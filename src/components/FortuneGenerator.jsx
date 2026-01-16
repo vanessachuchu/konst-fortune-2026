@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { generateFortuneImage } from '../utils/fortuneCanvas';
-import { generateFortuneWithGrok } from '../utils/grokAI';
+import { generateFortuneWithGemini } from '../utils/geminiAI';
 
 // AI 處理過程的有趣提示語
 const LOADING_MESSAGES = [
   'AI 正在解讀你的命運密碼...',
-  'Grok 神經網路運算中...',
+  'Gemini 神經網路運算中...',
   '從量子維度抓取運勢數據...',
   '機器學習模型推論中...',
   '正在生成你的命運算法...',
@@ -44,8 +44,8 @@ function FortuneGenerator({ employee, photo, wish, onComplete, onBack }) {
     try {
       setStatus('generating');
 
-      // 使用 Grok AI 生成籤詩內容
-      const fortuneContent = await generateFortuneWithGrok({
+      // 使用 Gemini AI 生成籤詩內容
+      const fortuneContent = await generateFortuneWithGemini({
         name: employee.name,
         adjective: employee.adjective || '',
         noun: employee.noun || '',
