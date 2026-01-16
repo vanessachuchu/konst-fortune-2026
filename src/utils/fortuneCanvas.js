@@ -1,32 +1,38 @@
-// Fortune Canvas Generator - 傳統廟宇籤詩風格
-// Generates traditional temple fortune slip style image
+// Fortune Canvas Generator - KONST AI 風格籤詩
+// Generates KONST branded fortune slip with better spacing
 
 const CANVAS_WIDTH = 1000;
-const CANVAS_HEIGHT = 1600;
+const CANVAS_HEIGHT = 1800; // 增加高度以容納更多間距
 
-// 傳統配色
+// KONST 品牌配色 + 傳統元素
 const COLORS = {
-  background: '#F5E6D3', // 古紙色
-  paper: '#FFF8E7', // 籤紙米白
-  border: '#8B4513', // 深木色邊框
-  gold: '#DAA520', // 金色
-  red: '#B22222', // 傳統紅
-  darkRed: '#8B0000', // 深紅
-  black: '#1a1a1a', // 墨黑
-  brown: '#5D4037', // 木頭棕
+  // KONST 品牌色
+  konstBlue: '#6366F1',       // 主要藍紫色
+  konstBlueDark: '#4F46E5',   // 深藍紫
+  konstBlueLight: '#818CF8',  // 淺藍紫
+  cyberGlow: '#00D4FF',       // 科技藍
+  spaceSilver: '#C0C0C0',     // 太空銀
+
+  // 傳統色彩
+  background: '#F8F4F0',      // 淺米灰背景
+  paper: '#FFFFFF',           // 純白籤紙
+  gold: '#D4AF37',            // 金色
+  red: '#DC2626',             // 現代紅
+  darkText: '#1F2937',        // 深灰文字
+  lightText: '#6B7280',       // 淺灰文字
 };
 
 // 天干地支
 const TIANGAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 const DIZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 
-// 籤詩等級
+// 籤詩等級 - 使用 KONST 配色
 const FORTUNE_LEVELS = [
-  { level: '上上籤', color: '#FFD700', desc: '大吉大利' },
-  { level: '上籤', color: '#FF6B6B', desc: '諸事順遂' },
-  { level: '中上籤', color: '#4ECDC4', desc: '穩中求進' },
-  { level: '中籤', color: '#95A5A6', desc: '平安是福' },
-  { level: '中下籤', color: '#E67E22', desc: '小心謹慎' },
+  { level: '上上籤', color: '#F59E0B', desc: '大吉大利' },
+  { level: '上籤', color: '#10B981', desc: '諸事順遂' },
+  { level: '中上籤', color: '#6366F1', desc: '穩中求進' },
+  { level: '中籤', color: '#8B5CF6', desc: '平安是福' },
+  { level: '中下籤', color: '#EC4899', desc: '小心謹慎' },
 ];
 
 // 心情對應的籤詩內容庫
@@ -150,27 +156,28 @@ function loadImage(src) {
   });
 }
 
-// 繪製傳統裝飾邊框
-function drawTraditionalBorder(ctx, x, y, width, height) {
-  const borderWidth = 8;
+// 繪製 KONST 風格邊框
+function drawKonstBorder(ctx, x, y, width, height) {
+  // 外框漸層
+  const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+  gradient.addColorStop(0, COLORS.konstBlue);
+  gradient.addColorStop(0.5, COLORS.konstBlueDark);
+  gradient.addColorStop(1, COLORS.konstBlue);
 
-  // 外框 - 深色
-  ctx.strokeStyle = COLORS.brown;
-  ctx.lineWidth = borderWidth;
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = 6;
   ctx.strokeRect(x, y, width, height);
 
   // 內框 - 金色
   ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(x + 15, y + 15, width - 30, height - 30);
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x + 12, y + 12, width - 24, height - 24);
 
-  // 角落裝飾
-  ctx.fillStyle = COLORS.gold;
-
-  // 四個角落畫裝飾
-  [[x + 15, y + 15], [x + width - 15, y + 15], [x + 15, y + height - 15], [x + width - 15, y + height - 15]].forEach(([cx, cy]) => {
+  // 四角裝飾 - KONST 藍紫色圓點
+  ctx.fillStyle = COLORS.konstBlue;
+  [[x + 12, y + 12], [x + width - 12, y + 12], [x + 12, y + height - 12], [x + width - 12, y + height - 12]].forEach(([cx, cy]) => {
     ctx.beginPath();
-    ctx.arc(cx, cy, 8, 0, Math.PI * 2);
+    ctx.arc(cx, cy, 6, 0, Math.PI * 2);
     ctx.fill();
   });
 }
@@ -178,12 +185,12 @@ function drawTraditionalBorder(ctx, x, y, width, height) {
 // 根據心情判斷運勢等級
 function getFortuneLevel(mood) {
   const moodToLevel = {
-    happy: 0,      // 上上籤
-    excited: 1,    // 上籤
-    calm: 2,       // 中上籤
-    neutral: 3,    // 中籤
-    confused: 3,   // 中籤
-    tired: 4,      // 中下籤
+    happy: 0,
+    excited: 1,
+    calm: 2,
+    neutral: 3,
+    confused: 3,
+    tired: 4,
   };
   return FORTUNE_LEVELS[moodToLevel[mood] || 3];
 }
@@ -202,9 +209,9 @@ function getFortuneNumber() {
   const tens = Math.floor(num / 10);
   const ones = num % 10;
 
-  if (num < 10) return `第${chineseNums[num]}首`;
-  if (ones === 0) return `第${chineseNums[tens]}拾首`;
-  return `第${chineseNums[tens]}拾${chineseNums[ones]}首`;
+  if (num < 10) return `第 ${chineseNums[num]} 首`;
+  if (ones === 0) return `第 ${chineseNums[tens]} 拾 首`;
+  return `第 ${chineseNums[tens]} 拾 ${chineseNums[ones]} 首`;
 }
 
 // 主要生成函數
@@ -214,14 +221,17 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
   canvas.height = CANVAS_HEIGHT;
   const ctx = canvas.getContext('2d');
 
-  // 背景 - 古紙質感
-  ctx.fillStyle = COLORS.background;
+  // 背景 - 淺灰白漸層
+  const bgGradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+  bgGradient.addColorStop(0, '#F8F4F0');
+  bgGradient.addColorStop(1, '#EDE9E5');
+  ctx.fillStyle = bgGradient;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-  // 加入紙張紋理效果
-  ctx.globalAlpha = 0.03;
-  for (let i = 0; i < 5000; i++) {
-    ctx.fillStyle = Math.random() > 0.5 ? '#000' : '#8B4513';
+  // 加入微妙紋理
+  ctx.globalAlpha = 0.02;
+  for (let i = 0; i < 3000; i++) {
+    ctx.fillStyle = Math.random() > 0.5 ? COLORS.konstBlue : COLORS.spaceSilver;
     ctx.fillRect(
       Math.random() * CANVAS_WIDTH,
       Math.random() * CANVAS_HEIGHT,
@@ -232,17 +242,21 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
   ctx.globalAlpha = 1;
 
   // 主要籤紙區域
-  const paperX = 50;
-  const paperY = 50;
-  const paperWidth = CANVAS_WIDTH - 100;
-  const paperHeight = CANVAS_HEIGHT - 100;
+  const paperX = 40;
+  const paperY = 40;
+  const paperWidth = CANVAS_WIDTH - 80;
+  const paperHeight = CANVAS_HEIGHT - 80;
 
-  // 籤紙底色
+  // 籤紙底色 - 純白
   ctx.fillStyle = COLORS.paper;
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+  ctx.shadowBlur = 20;
+  ctx.shadowOffsetY = 5;
   ctx.fillRect(paperX, paperY, paperWidth, paperHeight);
+  ctx.shadowColor = 'transparent';
 
-  // 傳統邊框
-  drawTraditionalBorder(ctx, paperX, paperY, paperWidth, paperHeight);
+  // KONST 風格邊框
+  drawKonstBorder(ctx, paperX, paperY, paperWidth, paperHeight);
 
   // 獲取籤詩內容
   const fortuneLevel = getFortuneLevel(mood);
@@ -257,60 +271,64 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
 
   let yPos = 100;
 
-  // 頂部：年份標題
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 36px "Noto Serif TC", "Noto Sans TC", serif';
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText(`貳零貳陸 歲次${yearGanzhi}`, CANVAS_WIDTH / 2, yPos);
-  yPos += 50;
+  // ===== 頂部區域 =====
 
-  // 籤號
-  ctx.font = 'bold 42px "Noto Serif TC", "Noto Sans TC", serif';
-  ctx.fillStyle = COLORS.black;
-  ctx.fillText(fortuneNumber, CANVAS_WIDTH / 2, yPos);
+  // 年份標題 - KONST 藍紫色
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 32px "Noto Serif TC", serif';
+  ctx.fillStyle = COLORS.konstBlue;
+  ctx.fillText(`貳 零 貳 陸   歲 次 ${yearGanzhi}`, CANVAS_WIDTH / 2, yPos);
   yPos += 60;
 
+  // 籤號 - 加大字間距
+  ctx.font = 'bold 38px "Noto Serif TC", serif';
+  ctx.fillStyle = COLORS.darkText;
+  ctx.fillText(fortuneNumber, CANVAS_WIDTH / 2, yPos);
+  yPos += 70;
+
   // 運勢等級 - 大字
-  ctx.font = 'bold 72px "Noto Serif TC", "Noto Sans TC", serif';
+  ctx.font = 'bold 68px "Noto Serif TC", serif';
   ctx.fillStyle = fortuneLevel.color;
-  // 描邊效果
-  ctx.strokeStyle = COLORS.brown;
-  ctx.lineWidth = 2;
-  ctx.strokeText(fortuneLevel.level, CANVAS_WIDTH / 2, yPos);
-  ctx.fillText(fortuneLevel.level, CANVAS_WIDTH / 2, yPos);
-  yPos += 40;
+  // 增加字間距
+  const levelChars = fortuneLevel.level.split('');
+  const levelText = levelChars.join(' ');
+  ctx.fillText(levelText, CANVAS_WIDTH / 2, yPos);
+  yPos += 50;
 
   // 運勢描述
-  ctx.font = '28px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.brown;
+  ctx.font = '26px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.lightText;
   ctx.fillText(fortuneLevel.desc, CANVAS_WIDTH / 2, yPos);
   yPos += 50;
 
-  // 分隔線
-  ctx.strokeStyle = COLORS.gold;
+  // 分隔線 - KONST 漸層
+  const lineGradient = ctx.createLinearGradient(100, yPos, CANVAS_WIDTH - 100, yPos);
+  lineGradient.addColorStop(0, 'transparent');
+  lineGradient.addColorStop(0.2, COLORS.konstBlueLight);
+  lineGradient.addColorStop(0.5, COLORS.konstBlue);
+  lineGradient.addColorStop(0.8, COLORS.konstBlueLight);
+  lineGradient.addColorStop(1, 'transparent');
+  ctx.strokeStyle = lineGradient;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(100, yPos);
   ctx.lineTo(CANVAS_WIDTH - 100, yPos);
   ctx.stroke();
-  yPos += 30;
+  yPos += 40;
 
-  // 照片區域 - 單張大照片
-  const photoAreaY = yPos;
-  const photoWidth = 300;
-  const photoHeight = 300;
+  // ===== 照片區域 =====
+  const photoWidth = 280;
+  const photoHeight = 280;
   const photoX = (CANVAS_WIDTH - photoWidth) / 2;
 
-  // 繪製照片框
-  ctx.strokeStyle = COLORS.gold;
+  // 照片外框 - KONST 藍紫色
+  ctx.strokeStyle = COLORS.konstBlue;
   ctx.lineWidth = 4;
-  ctx.strokeRect(photoX - 5, photoAreaY - 5, photoWidth + 10, photoHeight + 10);
+  ctx.strokeRect(photoX - 6, yPos - 6, photoWidth + 12, photoHeight + 12);
 
   // 繪製照片
   try {
     const img = await loadImage(photoDataUrl);
-
-    // 計算裁切
     const imgAspect = img.width / img.height;
     const targetAspect = photoWidth / photoHeight;
 
@@ -327,97 +345,93 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
       sy = (img.height - sHeight) / 2;
     }
 
-    // 繪製照片
     ctx.save();
     ctx.beginPath();
-    ctx.rect(photoX, photoAreaY, photoWidth, photoHeight);
+    ctx.rect(photoX, yPos, photoWidth, photoHeight);
     ctx.clip();
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, photoX, photoAreaY, photoWidth, photoHeight);
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, photoX, yPos, photoWidth, photoHeight);
     ctx.restore();
-
   } catch (e) {
-    // 照片載入失敗的備用方案
-    ctx.fillStyle = '#ddd';
-    ctx.fillRect(photoX, photoAreaY, photoWidth, photoHeight);
+    ctx.fillStyle = '#f3f4f6';
+    ctx.fillRect(photoX, yPos, photoWidth, photoHeight);
   }
 
-  yPos = photoAreaY + photoHeight + 30;
+  yPos += photoHeight + 40;
 
-  // 員工身份標籤 + 抽獎號碼
+  // ===== 員工資訊 =====
+
+  // 員工姓名
   ctx.font = 'bold 36px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText(`【 ${employeeData.name} 】`, CANVAS_WIDTH / 2, yPos);
+  ctx.fillStyle = COLORS.konstBlueDark;
+  ctx.fillText(employeeData.name, CANVAS_WIDTH / 2, yPos);
   yPos += 45;
 
   // 形容詞短語
-  ctx.font = '28px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.brown;
+  ctx.font = '26px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.darkText;
   ctx.fillText(`今年的我是「${employeeData.phrase}」`, CANVAS_WIDTH / 2, yPos);
-  yPos += 40;
+  yPos += 50;
 
-  // 抽獎號碼 - 顯眼的設計
-  const luckyBoxWidth = 200;
-  const luckyBoxHeight = 60;
+  // ===== 抽獎號碼 =====
+  const luckyBoxWidth = 180;
+  const luckyBoxHeight = 70;
   const luckyBoxX = (CANVAS_WIDTH - luckyBoxWidth) / 2;
 
-  // 抽獎號碼背景
-  ctx.fillStyle = COLORS.red;
+  // 抽獎號碼背景 - KONST 漸層
+  const luckyGradient = ctx.createLinearGradient(luckyBoxX, yPos, luckyBoxX + luckyBoxWidth, yPos + luckyBoxHeight);
+  luckyGradient.addColorStop(0, COLORS.konstBlue);
+  luckyGradient.addColorStop(1, COLORS.konstBlueDark);
+  ctx.fillStyle = luckyGradient;
   ctx.beginPath();
-  ctx.roundRect(luckyBoxX, yPos, luckyBoxWidth, luckyBoxHeight, 10);
+  ctx.roundRect(luckyBoxX, yPos, luckyBoxWidth, luckyBoxHeight, 12);
   ctx.fill();
 
-  // 抽獎號碼邊框
-  ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
   // 抽獎號碼文字
-  ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = '#fff';
-  ctx.fillText('抽獎號碼', CANVAS_WIDTH / 2, yPos + 22);
+  ctx.font = '18px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillText('抽獎號碼', CANVAS_WIDTH / 2, yPos + 25);
 
-  ctx.font = 'bold 32px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.gold;
-  ctx.fillText(employeeData.luckyNumber, CANVAS_WIDTH / 2, yPos + 52);
-  yPos += luckyBoxHeight + 30;
+  ctx.font = 'bold 32px "Orbitron", "Noto Sans TC", sans-serif';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText(employeeData.luckyNumber, CANVAS_WIDTH / 2, yPos + 58);
+  yPos += luckyBoxHeight + 45;
 
   // 分隔線
-  ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = lineGradient;
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(100, yPos);
-  ctx.lineTo(CANVAS_WIDTH - 100, yPos);
+  ctx.moveTo(120, yPos);
+  ctx.lineTo(CANVAS_WIDTH - 120, yPos);
   ctx.stroke();
-  yPos += 30;
+  yPos += 40;
 
-  // 籤詩詩句
-  ctx.font = '28px "Noto Serif TC", "Noto Sans TC", serif';
-  ctx.fillStyle = COLORS.black;
+  // ===== 籤詩詩句 =====
+  ctx.font = '26px "Noto Serif TC", serif';
+  ctx.fillStyle = COLORS.darkText;
 
-  // 詩句分行顯示
   const poemParts = poem.split('，');
   poemParts.forEach((part, i) => {
-    ctx.fillText(part + (i < poemParts.length - 1 ? '，' : ''), CANVAS_WIDTH / 2, yPos);
-    yPos += 38;
+    // 增加詩句字間距
+    const chars = part.split('');
+    const spacedText = chars.join(' ') + (i < poemParts.length - 1 ? ' ，' : '');
+    ctx.fillText(spacedText, CANVAS_WIDTH / 2, yPos);
+    yPos += 45;
   });
-  yPos += 15;
+  yPos += 25;
 
-  // 解籤區域
-  ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.brown;
+  // ===== AI 解籤 =====
+  const leftMargin = 100;
   ctx.textAlign = 'left';
 
-  const leftMargin = 100;
+  ctx.font = 'bold 22px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.konstBlue;
+  ctx.fillText('【 AI 解籤 】', leftMargin, yPos);
+  yPos += 40;
 
-  // AI 解籤
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText('【AI 解籤】', leftMargin, yPos);
-  yPos += 34;
+  ctx.font = '20px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.darkText;
 
-  ctx.font = '22px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.black;
-
-  // 自動換行處理
+  // 自動換行
   const maxWidth = CANVAS_WIDTH - 200;
   const words = advice.split('');
   let line = '';
@@ -428,104 +442,103 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
     if (metrics.width > maxWidth && line !== '') {
       ctx.fillText(line, leftMargin, yPos);
       line = words[i];
-      yPos += 30;
+      yPos += 35;
     } else {
       line = testLine;
     }
   }
   ctx.fillText(line, leftMargin, yPos);
-  yPos += 40;
+  yPos += 50;
 
-  // 事業運
-  ctx.font = 'bold 22px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText('事業運：', leftMargin, yPos);
-  ctx.font = '20px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.black;
+  // ===== 事業運 =====
+  ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.konstBlueDark;
+  ctx.fillText('事業運', leftMargin, yPos);
+  yPos += 35;
 
-  // 自動換行
+  ctx.font = '18px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.darkText;
+
   const workWords = workInterp.split('');
   line = '';
-  let workStartX = leftMargin + 85;
 
   for (let i = 0; i < workWords.length; i++) {
     const testLine = line + workWords[i];
     const metrics = ctx.measureText(testLine);
-    if (metrics.width > maxWidth - 100 && line !== '') {
-      ctx.fillText(line, workStartX, yPos);
+    if (metrics.width > maxWidth && line !== '') {
+      ctx.fillText(line, leftMargin, yPos);
       line = workWords[i];
-      yPos += 28;
-      workStartX = leftMargin;
+      yPos += 32;
     } else {
       line = testLine;
     }
   }
-  ctx.fillText(line, workStartX, yPos);
+  ctx.fillText(line, leftMargin, yPos);
+  yPos += 45;
+
+  // ===== 生活運 =====
+  ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.konstBlueDark;
+  ctx.fillText('生活運', leftMargin, yPos);
   yPos += 35;
 
-  // 生活運
-  ctx.font = 'bold 22px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText('生活運：', leftMargin, yPos);
-  ctx.font = '20px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.black;
+  ctx.font = '18px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.darkText;
 
-  // 自動換行
   const lifeWords = lifeInterp.split('');
   line = '';
-  let lifeStartX = leftMargin + 85;
 
   for (let i = 0; i < lifeWords.length; i++) {
     const testLine = line + lifeWords[i];
     const metrics = ctx.measureText(testLine);
-    if (metrics.width > maxWidth - 100 && line !== '') {
-      ctx.fillText(line, lifeStartX, yPos);
+    if (metrics.width > maxWidth && line !== '') {
+      ctx.fillText(line, leftMargin, yPos);
       line = lifeWords[i];
-      yPos += 28;
-      lifeStartX = leftMargin;
+      yPos += 32;
     } else {
       line = testLine;
     }
   }
-  ctx.fillText(line, lifeStartX, yPos);
-  yPos += 40;
-
-  // 願望區域
-  if (wish) {
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 22px "Noto Sans TC", sans-serif';
-    ctx.fillStyle = COLORS.darkRed;
-    ctx.fillText('【 2026 年願望 】', CANVAS_WIDTH / 2, yPos);
-    yPos += 32;
-
-    ctx.font = '24px "Noto Sans TC", sans-serif';
-    ctx.fillStyle = COLORS.brown;
-    ctx.fillText(`「${wish}」`, CANVAS_WIDTH / 2, yPos);
-    yPos += 35;
-  }
-
-  // 關鍵字
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 32px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.gold;
-  ctx.strokeStyle = COLORS.brown;
-  ctx.lineWidth = 1;
-  ctx.strokeText(`✦ ${keyword} ✦`, CANVAS_WIDTH / 2, yPos);
-  ctx.fillText(`✦ ${keyword} ✦`, CANVAS_WIDTH / 2, yPos);
+  ctx.fillText(line, leftMargin, yPos);
   yPos += 50;
 
-  // 底部資訊
-  ctx.font = '22px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.brown;
+  // ===== 願望區域 =====
+  if (wish) {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
+    ctx.fillStyle = COLORS.konstBlue;
+    ctx.fillText('【 2026 年願望 】', CANVAS_WIDTH / 2, yPos);
+    yPos += 38;
 
-  // KONST AI Logo 區域
-  ctx.font = 'bold 28px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText('KONST AI', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 80);
+    ctx.font = '22px "Noto Sans TC", sans-serif';
+    ctx.fillStyle = COLORS.darkText;
+    ctx.fillText(`「${wish}」`, CANVAS_WIDTH / 2, yPos);
+    yPos += 45;
+  }
 
-  ctx.font = '20px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.brown;
-  ctx.fillText('2026 尾牙 • AI 個性靈籤', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 50);
+  // ===== 關鍵字 =====
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 30px "Noto Sans TC", sans-serif';
+
+  // 關鍵字漸層色
+  const keywordGradient = ctx.createLinearGradient(
+    CANVAS_WIDTH / 2 - 100, yPos,
+    CANVAS_WIDTH / 2 + 100, yPos
+  );
+  keywordGradient.addColorStop(0, COLORS.konstBlue);
+  keywordGradient.addColorStop(0.5, COLORS.cyberGlow);
+  keywordGradient.addColorStop(1, COLORS.konstBlue);
+  ctx.fillStyle = keywordGradient;
+  ctx.fillText(`✦  ${keyword}  ✦`, CANVAS_WIDTH / 2, yPos);
+
+  // ===== 底部 KONST Logo =====
+  ctx.font = 'bold 26px "Orbitron", sans-serif';
+  ctx.fillStyle = COLORS.konstBlue;
+  ctx.fillText('KONST AI', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 90);
+
+  ctx.font = '18px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.lightText;
+  ctx.fillText('2026 尾牙  •  AI 個性靈籤', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 60);
 
   return canvas.toDataURL('image/png');
 }
@@ -585,13 +598,12 @@ export function printImage(dataUrl, printerType = 'thermal') {
   }
 }
 
-// 直接列印到熱感應印表機 (使用 Web Print API)
+// 直接列印到熱感應印表機
 export async function printToThermalPrinter(dataUrl) {
   try {
-    // 創建 canvas 來調整圖片大小
     const img = await loadImage(dataUrl);
     const canvas = document.createElement('canvas');
-    const targetWidth = 576; // 80mm 熱感應印表機標準寬度 (72dpi)
+    const targetWidth = 576;
     const scale = targetWidth / img.width;
     canvas.width = targetWidth;
     canvas.height = img.height * scale;
@@ -599,26 +611,22 @@ export async function printToThermalPrinter(dataUrl) {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-    // 轉成 blob
     const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
 
-    // 嘗試使用 Web Share API 或下載
     if (navigator.share && navigator.canShare({ files: [new File([blob], 'fortune.png', { type: 'image/png' })] })) {
       await navigator.share({
         files: [new File([blob], 'konst-fortune.png', { type: 'image/png' })],
         title: 'KONST AI 籤詩',
       });
     } else {
-      // 回退到普通列印
       printImage(dataUrl, 'thermal');
     }
   } catch (e) {
-    // 回退到普通列印
     printImage(dataUrl, 'thermal');
   }
 }
 
-// 心情分析結果
+// 心情選項
 export const MOOD_OPTIONS = [
   { id: 'happy', emoji: '😊', label: '開心愉快', desc: '今天心情超好！' },
   { id: 'calm', emoji: '😌', label: '平靜從容', desc: '內心安定踏實' },

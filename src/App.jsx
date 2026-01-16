@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import ModeSelector from './components/ModeSelector';
+import PreRegister from './components/PreRegister';
+import EventDayLogin from './components/EventDayLogin';
+import StylePreview from './components/StylePreview';
 import Login from './components/Login';
 import Camera from './components/Camera';
 import MoodSelector from './components/MoodSelector';
@@ -6,9 +10,13 @@ import FortuneGenerator from './components/FortuneGenerator';
 import Preview from './components/Preview';
 import './index.css';
 
-// Steps: login -> camera -> mood -> generating -> preview
+// 流程步驟
 const STEPS = {
-  LOGIN: 'login',
+  MODE_SELECT: 'mode_select',     // 首頁模式選擇
+  PRE_REGISTER: 'pre_register',   // 活動前預註冊
+  EVENT_LOGIN: 'event_login',     // 活動當天登入
+  STYLE_PREVIEW: 'style_preview', // 風格預覽
+  LOGIN: 'login',                 // 快速模式登入
   CAMERA: 'camera',
   MOOD: 'mood',
   GENERATING: 'generating',
@@ -26,14 +34,45 @@ const KonstLogo = () => (
 );
 
 function App() {
-  const [currentStep, setCurrentStep] = useState(STEPS.LOGIN);
+  const [currentStep, setCurrentStep] = useState(STEPS.MODE_SELECT);
+  const [appMode, setAppMode] = useState(null); // 'preregister', 'eventday', 'quick'
   const [employee, setEmployee] = useState(null);
   const [photo, setPhoto] = useState(null);
   const [mood, setMood] = useState(null);
   const [wish, setWish] = useState('');
   const [fortuneImage, setFortuneImage] = useState(null);
 
-  const handleLogin = (employeeData) => {
+  // 模式選擇
+  const handleModeSelect = (mode) => {
+    setAppMode(mode);
+    switch (mode) {
+      case 'preregister':
+        setCurrentStep(STEPS.PRE_REGISTER);
+        break;
+      case 'eventday':
+        setCurrentStep(STEPS.EVENT_LOGIN);
+        break;
+      case 'quick':
+        setCurrentStep(STEPS.LOGIN);
+        break;
+      default:
+        setCurrentStep(STEPS.MODE_SELECT);
+    }
+  };
+
+  // 活動當天選擇員工
+  const handleEventDaySelect = (selectedEmployee) => {
+    setEmployee(selectedEmployee);
+    setCurrentStep(STEPS.STYLE_PREVIEW);
+  };
+
+  // 從風格預覽進入拍照
+  const handleStylePreviewContinue = () => {
+    setCurrentStep(STEPS.CAMERA);
+  };
+
+  // 快速模式登入（無預註冊資料）
+  const handleQuickLogin = (employeeData) => {
     setEmployee(employeeData);
     setCurrentStep(STEPS.CAMERA);
   };
@@ -60,7 +99,23 @@ function App() {
     setMood(null);
     setWish('');
     setFortuneImage(null);
-    setCurrentStep(STEPS.LOGIN);
+    // 根據模式返回不同頁面
+    if (appMode === 'eventday') {
+      setCurrentStep(STEPS.EVENT_LOGIN);
+    } else {
+      setCurrentStep(STEPS.MODE_SELECT);
+      setAppMode(null);
+    }
+  };
+
+  const handleBackToModeSelect = () => {
+    setEmployee(null);
+    setPhoto(null);
+    setMood(null);
+    setWish('');
+    setFortuneImage(null);
+    setAppMode(null);
+    setCurrentStep(STEPS.MODE_SELECT);
   };
 
   const handleBackToCamera = () => {
@@ -76,21 +131,36 @@ function App() {
 
   const handleBackToLogin = () => {
     setEmployee(null);
-    setCurrentStep(STEPS.LOGIN);
+    if (appMode === 'eventday') {
+      setCurrentStep(STEPS.EVENT_LOGIN);
+    } else {
+      setCurrentStep(STEPS.LOGIN);
+    }
+  };
+
+  const handleBackToStylePreview = () => {
+    setPhoto(null);
+    setCurrentStep(STEPS.STYLE_PREVIEW);
   };
 
   const getStepIndex = () => {
     switch (currentStep) {
-      case STEPS.LOGIN:
+      case STEPS.MODE_SELECT:
+      case STEPS.PRE_REGISTER:
         return 0;
-      case STEPS.CAMERA:
+      case STEPS.EVENT_LOGIN:
+      case STEPS.LOGIN:
         return 1;
-      case STEPS.MOOD:
+      case STEPS.STYLE_PREVIEW:
+        return 1;
+      case STEPS.CAMERA:
         return 2;
-      case STEPS.GENERATING:
+      case STEPS.MOOD:
         return 3;
-      case STEPS.PREVIEW:
+      case STEPS.GENERATING:
         return 4;
+      case STEPS.PREVIEW:
+        return 5;
       default:
         return 0;
     }
@@ -98,16 +168,46 @@ function App() {
 
   const renderStep = () => {
     switch (currentStep) {
+      case STEPS.MODE_SELECT:
+        return <ModeSelector onSelectMode={handleModeSelect} />;
+
+      case STEPS.PRE_REGISTER:
+        return (
+          <PreRegister
+            onComplete={() => setCurrentStep(STEPS.MODE_SELECT)}
+            onBack={handleBackToModeSelect}
+          />
+        );
+
+      case STEPS.EVENT_LOGIN:
+        return (
+          <EventDayLogin
+            onSelect={handleEventDaySelect}
+            onBack={handleBackToModeSelect}
+          />
+        );
+
+      case STEPS.STYLE_PREVIEW:
+        return (
+          <StylePreview
+            employee={employee}
+            onContinue={handleStylePreviewContinue}
+            onBack={() => setCurrentStep(STEPS.EVENT_LOGIN)}
+          />
+        );
+
       case STEPS.LOGIN:
-        return <Login onLogin={handleLogin} />;
+        return <Login onLogin={handleQuickLogin} />;
+
       case STEPS.CAMERA:
         return (
           <Camera
             employee={employee}
             onCapture={handleCapture}
-            onBack={handleBackToLogin}
+            onBack={appMode === 'eventday' ? handleBackToStylePreview : handleBackToLogin}
           />
         );
+
       case STEPS.MOOD:
         return (
           <MoodSelector
@@ -117,6 +217,7 @@ function App() {
             onBack={handleBackToCamera}
           />
         );
+
       case STEPS.GENERATING:
         return (
           <FortuneGenerator
@@ -128,6 +229,7 @@ function App() {
             onBack={handleBackToMood}
           />
         );
+
       case STEPS.PREVIEW:
         return (
           <Preview
@@ -136,10 +238,14 @@ function App() {
             onRestart={handleRestart}
           />
         );
+
       default:
-        return <Login onLogin={handleLogin} />;
+        return <ModeSelector onSelectMode={handleModeSelect} />;
     }
   };
+
+  // 判斷是否顯示進度條
+  const showProgress = ![STEPS.MODE_SELECT, STEPS.PRE_REGISTER].includes(currentStep);
 
   return (
     <div className="app-container">
@@ -150,20 +256,22 @@ function App() {
         <h1>AI 靈籤</h1>
         <h2>貳零貳陸 尾牙特別版</h2>
 
-        <div className="progress-steps">
-          {[0, 1, 2, 3, 4].map((step) => (
-            <div
-              key={step}
-              className={`progress-step ${
-                step < getStepIndex()
-                  ? 'completed'
-                  : step === getStepIndex()
-                  ? 'active'
-                  : ''
-              }`}
-            />
-          ))}
-        </div>
+        {showProgress && (
+          <div className="progress-steps">
+            {[0, 1, 2, 3, 4, 5].map((step) => (
+              <div
+                key={step}
+                className={`progress-step ${
+                  step < getStepIndex()
+                    ? 'completed'
+                    : step === getStepIndex()
+                    ? 'active'
+                    : ''
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </header>
 
       <main className="card">
