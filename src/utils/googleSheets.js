@@ -1,8 +1,8 @@
 // Google Sheets API 工具
 // 使用 Google Apps Script Web App 作為中間層
 
-// Google Apps Script Web App URL (需要設定)
-const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || '';
+// Google Apps Script Web App URL
+const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbyHgQPn3ZhwGu4bFxRv9-E38beOoTlBR178T-rY6Yo/dev';
 
 // 本地儲存 key (當 Google Sheets 無法連接時的備用方案)
 const LOCAL_STORAGE_KEY = 'konst-employees-2026';
