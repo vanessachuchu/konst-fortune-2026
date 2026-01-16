@@ -33,8 +33,8 @@ function App() {
   const [wish, setWish] = useState('');
   const [fortuneImage, setFortuneImage] = useState(null);
 
-  const handleLogin = (selectedEmployee) => {
-    setEmployee(selectedEmployee);
+  const handleLogin = (employeeData) => {
+    setEmployee(employeeData);
     setCurrentStep(STEPS.CAMERA);
   };
 
@@ -175,7 +175,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p>KONST AI © 2026</p>
+        <p>KONST AI 2026</p>
       </footer>
     </div>
   );

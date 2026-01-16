@@ -5,17 +5,36 @@ function MoodSelector({ employee, photo, onSelect, onBack }) {
   const [selectedMood, setSelectedMood] = useState(null);
   const [wish, setWish] = useState('');
 
+  // 願望範例
+  const wishHints = [
+    '升職加薪',
+    '身體健康',
+    '脫單成功',
+    '買房買車',
+    '學新技能',
+    '環遊世界',
+    '財富自由',
+    '工作順利',
+  ];
+
   const handleConfirm = () => {
     if (selectedMood) {
       onSelect(selectedMood, wish);
     }
   };
 
+  const handleWishHint = (hint) => {
+    setWish(hint);
+  };
+
   return (
     <div className="mood-section">
       <div className="welcome-text">
         <div className="employee-badge">
-          {employee.name}
+          {employee.name} • {employee.phrase}
+        </div>
+        <div className="lucky-number-badge">
+          抽獎號碼：<span className="lucky-number">{employee.luckyNumber}</span>
         </div>
         <h3>AI 正在解讀你的照片...</h3>
         <p>選擇最符合你現在心情的選項</p>
@@ -45,14 +64,27 @@ function MoodSelector({ employee, photo, onSelect, onBack }) {
 
       {/* 心願輸入 */}
       <div className="wish-section">
-        <label>2026 年你的心願是？（選填）</label>
+        <label>2026 年你的願望是什麼？</label>
         <textarea
           value={wish}
           onChange={(e) => setWish(e.target.value)}
-          placeholder="例如：升職加薪、學新技能、脫單、環遊世界..."
+          placeholder="寫下你對未來一年的期許..."
           maxLength={50}
         />
         <span className="char-count">{wish.length}/50</span>
+
+        <div className="wish-hints">
+          {wishHints.map((hint) => (
+            <button
+              key={hint}
+              type="button"
+              className={`wish-hint-chip ${wish === hint ? 'selected' : ''}`}
+              onClick={() => handleWishHint(hint)}
+            >
+              {hint}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="btn-group">

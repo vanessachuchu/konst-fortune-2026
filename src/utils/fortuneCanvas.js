@@ -165,22 +165,13 @@ function drawTraditionalBorder(ctx, x, y, width, height) {
   ctx.strokeRect(x + 15, y + 15, width - 30, height - 30);
 
   // 角落裝飾
-  const cornerSize = 30;
   ctx.fillStyle = COLORS.gold;
 
   // 四個角落畫裝飾
-  [[x + 15, y + 15], [x + width - 15, y + 15], [x + 15, y + height - 15], [x + width - 15, y + height - 15]].forEach(([cx, cy], i) => {
+  [[x + 15, y + 15], [x + width - 15, y + 15], [x + 15, y + height - 15], [x + width - 15, y + height - 15]].forEach(([cx, cy]) => {
     ctx.beginPath();
     ctx.arc(cx, cy, 8, 0, Math.PI * 2);
     ctx.fill();
-  });
-}
-
-// 繪製直式文字
-function drawVerticalText(ctx, text, x, y, lineHeight) {
-  const chars = text.split('');
-  chars.forEach((char, i) => {
-    ctx.fillText(char, x, y + i * lineHeight);
   });
 }
 
@@ -217,7 +208,7 @@ function getFortuneNumber() {
 }
 
 // 主要生成函數
-export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'neutral') {
+export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'neutral', wish = '') {
   const canvas = document.createElement('canvas');
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
@@ -302,31 +293,18 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
   ctx.moveTo(100, yPos);
   ctx.lineTo(CANVAS_WIDTH - 100, yPos);
   ctx.stroke();
-  yPos += 40;
+  yPos += 30;
 
-  // 照片區域（兩欄式：左邊預演/右邊實拍）
+  // 照片區域 - 單張大照片
   const photoAreaY = yPos;
-  const photoWidth = 380;
-  const photoHeight = 280;
-
-  // 左側：AI 預演穿搭圖（使用實際照片模擬）
-  ctx.fillStyle = COLORS.brown;
-  ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
-  ctx.fillText('AI 預演穿搭圖', 250, photoAreaY);
-
-  // 右側：現場實拍照
-  ctx.fillText('現場實拍照', 750, photoAreaY);
+  const photoWidth = 300;
+  const photoHeight = 300;
+  const photoX = (CANVAS_WIDTH - photoWidth) / 2;
 
   // 繪製照片框
-  const leftPhotoX = 60;
-  const rightPhotoX = 520;
-  const photoY = photoAreaY + 20;
-
-  // 照片框裝飾
   ctx.strokeStyle = COLORS.gold;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(leftPhotoX, photoY, photoWidth, photoHeight);
-  ctx.strokeRect(rightPhotoX, photoY, photoWidth, photoHeight);
+  ctx.lineWidth = 4;
+  ctx.strokeRect(photoX - 5, photoAreaY - 5, photoWidth + 10, photoHeight + 10);
 
   // 繪製照片
   try {
@@ -349,60 +327,83 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
       sy = (img.height - sHeight) / 2;
     }
 
-    // 左側照片（加濾鏡效果模擬 AI 預演）
+    // 繪製照片
     ctx.save();
     ctx.beginPath();
-    ctx.rect(leftPhotoX, photoY, photoWidth, photoHeight);
+    ctx.rect(photoX, photoAreaY, photoWidth, photoHeight);
     ctx.clip();
-    ctx.filter = 'saturate(1.3) contrast(1.1)';
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, leftPhotoX, photoY, photoWidth, photoHeight);
-    ctx.restore();
-
-    // 右側照片（原圖）
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(rightPhotoX, photoY, photoWidth, photoHeight);
-    ctx.clip();
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, rightPhotoX, photoY, photoWidth, photoHeight);
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, photoX, photoAreaY, photoWidth, photoHeight);
     ctx.restore();
 
   } catch (e) {
     // 照片載入失敗的備用方案
     ctx.fillStyle = '#ddd';
-    ctx.fillRect(leftPhotoX, photoY, photoWidth, photoHeight);
-    ctx.fillRect(rightPhotoX, photoY, photoWidth, photoHeight);
+    ctx.fillRect(photoX, photoAreaY, photoWidth, photoHeight);
   }
 
-  yPos = photoY + photoHeight + 50;
+  yPos = photoAreaY + photoHeight + 30;
+
+  // 員工身份標籤 + 抽獎號碼
+  ctx.font = 'bold 36px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.darkRed;
+  ctx.fillText(`【 ${employeeData.name} 】`, CANVAS_WIDTH / 2, yPos);
+  yPos += 45;
+
+  // 形容詞短語
+  ctx.font = '28px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.brown;
+  ctx.fillText(`今年的我是「${employeeData.phrase}」`, CANVAS_WIDTH / 2, yPos);
+  yPos += 40;
+
+  // 抽獎號碼 - 顯眼的設計
+  const luckyBoxWidth = 200;
+  const luckyBoxHeight = 60;
+  const luckyBoxX = (CANVAS_WIDTH - luckyBoxWidth) / 2;
+
+  // 抽獎號碼背景
+  ctx.fillStyle = COLORS.red;
+  ctx.beginPath();
+  ctx.roundRect(luckyBoxX, yPos, luckyBoxWidth, luckyBoxHeight, 10);
+  ctx.fill();
+
+  // 抽獎號碼邊框
+  ctx.strokeStyle = COLORS.gold;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // 抽獎號碼文字
+  ctx.font = 'bold 20px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.fillText('抽獎號碼', CANVAS_WIDTH / 2, yPos + 22);
+
+  ctx.font = 'bold 32px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.gold;
+  ctx.fillText(employeeData.luckyNumber, CANVAS_WIDTH / 2, yPos + 52);
+  yPos += luckyBoxHeight + 30;
 
   // 分隔線
   ctx.strokeStyle = COLORS.gold;
+  ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(100, yPos);
   ctx.lineTo(CANVAS_WIDTH - 100, yPos);
   ctx.stroke();
-  yPos += 40;
-
-  // 員工身份標籤
-  ctx.font = 'bold 32px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText(`【 ${employeeData.name} • ${employeeData.phrase} 】`, CANVAS_WIDTH / 2, yPos);
-  yPos += 50;
+  yPos += 30;
 
   // 籤詩詩句
-  ctx.font = '30px "Noto Serif TC", "Noto Sans TC", serif';
+  ctx.font = '28px "Noto Serif TC", "Noto Sans TC", serif';
   ctx.fillStyle = COLORS.black;
 
   // 詩句分行顯示
   const poemParts = poem.split('，');
   poemParts.forEach((part, i) => {
     ctx.fillText(part + (i < poemParts.length - 1 ? '，' : ''), CANVAS_WIDTH / 2, yPos);
-    yPos += 42;
+    yPos += 38;
   });
-  yPos += 20;
+  yPos += 15;
 
   // 解籤區域
-  ctx.font = 'bold 26px "Noto Sans TC", sans-serif';
+  ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
   ctx.fillStyle = COLORS.brown;
   ctx.textAlign = 'left';
 
@@ -411,9 +412,9 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
   // AI 解籤
   ctx.fillStyle = COLORS.darkRed;
   ctx.fillText('【AI 解籤】', leftMargin, yPos);
-  yPos += 38;
+  yPos += 34;
 
-  ctx.font = '24px "Noto Sans TC", sans-serif';
+  ctx.font = '22px "Noto Sans TC", sans-serif';
   ctx.fillStyle = COLORS.black;
 
   // 自動換行處理
@@ -427,35 +428,85 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
     if (metrics.width > maxWidth && line !== '') {
       ctx.fillText(line, leftMargin, yPos);
       line = words[i];
-      yPos += 34;
+      yPos += 30;
     } else {
       line = testLine;
     }
   }
   ctx.fillText(line, leftMargin, yPos);
-  yPos += 50;
-
-  // 事業運
-  ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.darkRed;
-  ctx.fillText('事業運：', leftMargin, yPos);
-  ctx.font = '22px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = COLORS.black;
-  ctx.fillText(workInterp, leftMargin + 90, yPos);
   yPos += 40;
 
+  // 事業運
+  ctx.font = 'bold 22px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.darkRed;
+  ctx.fillText('事業運：', leftMargin, yPos);
+  ctx.font = '20px "Noto Sans TC", sans-serif';
+  ctx.fillStyle = COLORS.black;
+
+  // 自動換行
+  const workWords = workInterp.split('');
+  line = '';
+  let workStartX = leftMargin + 85;
+
+  for (let i = 0; i < workWords.length; i++) {
+    const testLine = line + workWords[i];
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth - 100 && line !== '') {
+      ctx.fillText(line, workStartX, yPos);
+      line = workWords[i];
+      yPos += 28;
+      workStartX = leftMargin;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, workStartX, yPos);
+  yPos += 35;
+
   // 生活運
-  ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
+  ctx.font = 'bold 22px "Noto Sans TC", sans-serif';
   ctx.fillStyle = COLORS.darkRed;
   ctx.fillText('生活運：', leftMargin, yPos);
-  ctx.font = '22px "Noto Sans TC", sans-serif';
+  ctx.font = '20px "Noto Sans TC", sans-serif';
   ctx.fillStyle = COLORS.black;
-  ctx.fillText(lifeInterp, leftMargin + 90, yPos);
-  yPos += 50;
+
+  // 自動換行
+  const lifeWords = lifeInterp.split('');
+  line = '';
+  let lifeStartX = leftMargin + 85;
+
+  for (let i = 0; i < lifeWords.length; i++) {
+    const testLine = line + lifeWords[i];
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth - 100 && line !== '') {
+      ctx.fillText(line, lifeStartX, yPos);
+      line = lifeWords[i];
+      yPos += 28;
+      lifeStartX = leftMargin;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, lifeStartX, yPos);
+  yPos += 40;
+
+  // 願望區域
+  if (wish) {
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 22px "Noto Sans TC", sans-serif';
+    ctx.fillStyle = COLORS.darkRed;
+    ctx.fillText('【 2026 年願望 】', CANVAS_WIDTH / 2, yPos);
+    yPos += 32;
+
+    ctx.font = '24px "Noto Sans TC", sans-serif';
+    ctx.fillStyle = COLORS.brown;
+    ctx.fillText(`「${wish}」`, CANVAS_WIDTH / 2, yPos);
+    yPos += 35;
+  }
 
   // 關鍵字
   ctx.textAlign = 'center';
-  ctx.font = 'bold 36px "Noto Sans TC", sans-serif';
+  ctx.font = 'bold 32px "Noto Sans TC", sans-serif';
   ctx.fillStyle = COLORS.gold;
   ctx.strokeStyle = COLORS.brown;
   ctx.lineWidth = 1;
@@ -463,32 +514,9 @@ export async function generateFortuneImage(employeeData, photoDataUrl, mood = 'n
   ctx.fillText(`✦ ${keyword} ✦`, CANVAS_WIDTH / 2, yPos);
   yPos += 50;
 
-  // 獎金區域
-  const prizeY = yPos;
-  const prizeBoxWidth = 300;
-  const prizeBoxHeight = 60;
-  const prizeBoxX = (CANVAS_WIDTH - prizeBoxWidth) / 2;
-
-  // 獎金背景
-  ctx.fillStyle = employeeData.fortune.isSpecial ? COLORS.gold : COLORS.red;
-  ctx.beginPath();
-  ctx.roundRect(prizeBoxX, prizeY, prizeBoxWidth, prizeBoxHeight, 10);
-  ctx.fill();
-
-  // 獎金文字
-  ctx.font = 'bold 32px "Noto Sans TC", sans-serif';
-  ctx.fillStyle = 'white';
-  const prizeText = employeeData.fortune.isSpecial
-    ? `特獎 $${employeeData.fortune.specialPrize.toLocaleString()}`
-    : `普獎 $${employeeData.fortune.prize}`;
-  ctx.fillText(prizeText, CANVAS_WIDTH / 2, prizeY + 42);
-  yPos += 90;
-
   // 底部資訊
   ctx.font = '22px "Noto Sans TC", sans-serif';
   ctx.fillStyle = COLORS.brown;
-  ctx.fillText(`編號 ${employeeData.id}`, CANVAS_WIDTH / 2, yPos);
-  yPos += 30;
 
   // KONST AI Logo 區域
   ctx.font = 'bold 28px "Noto Sans TC", sans-serif';
@@ -512,23 +540,41 @@ export function downloadImage(dataUrl, filename) {
   document.body.removeChild(link);
 }
 
-// Print the image
-export function printImage(dataUrl) {
-  const printWindow = window.open('', '', 'width=800,height=1200');
+// Print the image - 專門為小型熱感應印表機優化
+export function printImage(dataUrl, printerType = 'thermal') {
+  const printWindow = window.open('', '', 'width=400,height=600');
   if (printWindow) {
+    const styles = printerType === 'thermal'
+      ? `
+        @page {
+          size: 80mm auto;
+          margin: 0;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+          width: 80mm;
+        }
+        img {
+          width: 80mm;
+          height: auto;
+        }
+      `
+      : `
+        body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        img { max-width: 100%; max-height: 100vh; }
+        @media print {
+          body { margin: 0; }
+          img { width: 100%; height: auto; }
+        }
+      `;
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
           <title>KONST AI 籤詩</title>
-          <style>
-            body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-            img { max-width: 100%; max-height: 100vh; }
-            @media print {
-              body { margin: 0; }
-              img { width: 100%; height: auto; }
-            }
-          </style>
+          <style>${styles}</style>
         </head>
         <body>
           <img src="${dataUrl}" onload="setTimeout(() => { window.print(); window.close(); }, 500);" />
@@ -536,6 +582,39 @@ export function printImage(dataUrl) {
       </html>
     `);
     printWindow.document.close();
+  }
+}
+
+// 直接列印到熱感應印表機 (使用 Web Print API)
+export async function printToThermalPrinter(dataUrl) {
+  try {
+    // 創建 canvas 來調整圖片大小
+    const img = await loadImage(dataUrl);
+    const canvas = document.createElement('canvas');
+    const targetWidth = 576; // 80mm 熱感應印表機標準寬度 (72dpi)
+    const scale = targetWidth / img.width;
+    canvas.width = targetWidth;
+    canvas.height = img.height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // 轉成 blob
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+
+    // 嘗試使用 Web Share API 或下載
+    if (navigator.share && navigator.canShare({ files: [new File([blob], 'fortune.png', { type: 'image/png' })] })) {
+      await navigator.share({
+        files: [new File([blob], 'konst-fortune.png', { type: 'image/png' })],
+        title: 'KONST AI 籤詩',
+      });
+    } else {
+      // 回退到普通列印
+      printImage(dataUrl, 'thermal');
+    }
+  } catch (e) {
+    // 回退到普通列印
+    printImage(dataUrl, 'thermal');
   }
 }
 

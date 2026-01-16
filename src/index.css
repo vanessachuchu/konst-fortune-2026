@@ -946,3 +946,228 @@ input[type="text"]::placeholder {
   border-bottom: 2px solid var(--konst-blue);
   border-right: 2px solid var(--konst-blue);
 }
+
+/* Phrase Input Styles */
+.form-hint {
+  font-size: 0.85rem;
+  color: var(--space-silver-dark);
+  margin-bottom: 12px;
+}
+
+.phrase-inputs {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.phrase-input-group {
+  flex: 1;
+}
+
+.phrase-input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.phrase-input-group input:focus {
+  outline: none;
+  border-color: var(--konst-blue);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.phrase-input-group input::placeholder {
+  color: var(--space-silver-dark);
+}
+
+.phrase-plus {
+  color: var(--konst-blue);
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding-top: 12px;
+}
+
+.hint-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.hint-chip {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--dark-border);
+  border-radius: 20px;
+  color: var(--space-silver);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.hint-chip:hover {
+  border-color: var(--konst-blue);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.hint-chip.selected {
+  background: var(--konst-blue);
+  border-color: var(--konst-blue);
+  color: white;
+}
+
+.phrase-preview {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 8px;
+  text-align: center;
+  color: var(--space-silver);
+  border: 1px solid var(--konst-blue);
+}
+
+.phrase-preview strong {
+  color: var(--cyber-glow);
+  font-size: 1.1rem;
+}
+
+/* Wish Hints */
+.wish-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.wish-hint-chip {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--dark-border);
+  border-radius: 20px;
+  color: var(--space-silver);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.wish-hint-chip:hover {
+  border-color: var(--konst-blue);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.wish-hint-chip.selected {
+  background: var(--konst-blue);
+  border-color: var(--konst-blue);
+  color: white;
+}
+
+/* Lucky Number Badge */
+.lucky-number-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(218, 165, 32, 0.2);
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid var(--gold-color);
+  color: var(--gold-color);
+  font-size: 0.9rem;
+}
+
+.lucky-number {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--accent-color);
+}
+
+/* Lucky Number Display in Preview */
+.lucky-number-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #6B0000 100%);
+  padding: 16px 24px;
+  border-radius: 12px;
+  margin: 12px auto;
+  max-width: 200px;
+  border: 2px solid var(--gold-color);
+}
+
+.lucky-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 4px;
+}
+
+.lucky-number-big {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--accent-color);
+  text-shadow: 0 0 20px var(--gold-color);
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.print-options {
+  display: flex;
+  gap: 10px;
+}
+
+.print-options .btn {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+}
+
+.btn-thermal {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+  border: none;
+}
+
+.btn-thermal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--space-silver);
+  border: 1px solid var(--dark-border);
+}
+
+.btn-outline:hover {
+  border-color: var(--konst-blue);
+  color: var(--konst-blue-light);
+}
+
+.footer-note {
+  margin-top: 20px;
+  font-size: 0.8rem;
+  color: var(--space-silver-dark);
+  text-align: center;
+}
+
+/* Login Section adjustments */
+.login-section {
+  position: relative;
+  z-index: 1;
+}
