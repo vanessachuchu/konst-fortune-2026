@@ -14,8 +14,10 @@ export async function fetchEmployees() {
   // 先嘗試從 Google Sheets 獲取
   if (SCRIPT_URL) {
     try {
-      const data = await fetchGoogleSheets(`${SCRIPT_URL}?action=getAll`);
-      if (data && data.employees) {
+      // 使用最簡單的 GET 請求（不加任何 headers，避免 CORS 預檢）
+      const response = await fetch(`${SCRIPT_URL}?action=getAll`);
+      if (response.ok) {
+        const data = await response.json();
         // 同時更新本地快取
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
         return data.employees || [];
@@ -27,56 +29,6 @@ export async function fetchEmployees() {
 
   // 回退到本地儲存
   return getLocalEmployees();
-}
-
-/**
- * 透過隱藏 iframe 發送請求到 Google Sheets（繞過 CORS）
- */
-function fetchGoogleSheets(url) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      reject(new Error('Request timeout'));
-    }, 8000);
-
-    // 創建隱藏的 iframe 來載入資料
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = url;
-
-    // 使用 message 事件接收資料（需要 Apps Script 配合）
-    const messageHandler = (event) => {
-      if (event.origin.includes('googleusercontent.com') || event.origin.includes('google.com')) {
-        try {
-          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-          clearTimeout(timeout);
-          window.removeEventListener('message', messageHandler);
-          document.body.removeChild(iframe);
-          resolve(data);
-        } catch (e) {
-          // 忽略無法解析的訊息
-        }
-      }
-    };
-
-    window.addEventListener('message', messageHandler);
-    document.body.appendChild(iframe);
-
-    // 備用方案：如果 iframe 方式失敗，嘗試直接 fetch
-    setTimeout(async () => {
-      try {
-        const response = await fetch(url, { mode: 'cors' });
-        if (response.ok) {
-          const data = await response.json();
-          clearTimeout(timeout);
-          window.removeEventListener('message', messageHandler);
-          if (iframe.parentNode) document.body.removeChild(iframe);
-          resolve(data);
-        }
-      } catch (e) {
-        // 靜默失敗，等待 timeout
-      }
-    }, 100);
-  });
 }
 
 /**
