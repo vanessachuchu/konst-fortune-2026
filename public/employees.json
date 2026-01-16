@@ -1,0 +1,496 @@
+{
+  "employees": [
+    {
+      "id": "001",
+      "name": "Phil",
+      "phrase": "脆皮打工人",
+      "fortune": {
+        "number": "第肆肆首",
+        "type": "脆脆大吉",
+        "description": "脆皮升級防彈版，deadline前從容吃宵夜",
+        "keyword": "脆度UP",
+        "conclusion": "效率爆表",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "002",
+      "name": "Tony",
+      "phrase": "從容老靈魂",
+      "fortune": {
+        "number": "第壹壹首",
+        "type": "超穩中上",
+        "description": "從容變超能力，機會主動找上門",
+        "keyword": "游刃有餘",
+        "conclusion": "身心平衡",
+        "prize": 300,
+        "isSpecial": true,
+        "specialPrize": 10000
+      }
+    },
+    {
+      "id": "003",
+      "name": "Rima",
+      "phrase": "社畜修仙者",
+      "fortune": {
+        "number": "第貳參首",
+        "type": "穩穩上吉",
+        "description": "修仙成功出關，功力大增一甲子",
+        "keyword": "靈氣滿滿",
+        "conclusion": "渡劫成功",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "004",
+      "name": "Kevin",
+      "phrase": "佛系程式碼",
+      "fortune": {
+        "number": "第伍陸首",
+        "type": "佛佛中吉",
+        "description": "程式自己會跑，Bug自動修復",
+        "keyword": "禪定Debug",
+        "conclusion": "無為而治",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "005",
+      "name": "Emily",
+      "phrase": "早餐吃到飽",
+      "fortune": {
+        "number": "第柒捌首",
+        "type": "飽飽上吉",
+        "description": "能量滿格開工，創意源源不絕",
+        "keyword": "元氣百倍",
+        "conclusion": "活力充沛",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "006",
+      "name": "Jason",
+      "phrase": "咖啡因戰士",
+      "fortune": {
+        "number": "第玖拾首",
+        "type": "濃濃大吉",
+        "description": "一杯提神醒腦，三杯天下無敵",
+        "keyword": "咖啡因Max",
+        "conclusion": "精神抖擻",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "007",
+      "name": "Lisa",
+      "phrase": "Excel大師",
+      "fortune": {
+        "number": "第壹貳首",
+        "type": "算算上吉",
+        "description": "公式自動生成，報表一秒搞定",
+        "keyword": "函數加持",
+        "conclusion": "數據王者",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "008",
+      "name": "David",
+      "phrase": "會議終結者",
+      "fortune": {
+        "number": "第參肆首",
+        "type": "準準中吉",
+        "description": "會議準時結束，效率翻倍成長",
+        "keyword": "時間管理",
+        "conclusion": "會議殺手",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "009",
+      "name": "Amy",
+      "phrase": "通勤睡眠家",
+      "fortune": {
+        "number": "第伍陸首",
+        "type": "睡睡上吉",
+        "description": "閉眼養神十分鐘，勝過熬夜三小時",
+        "keyword": "秒睡達人",
+        "conclusion": "精神百倍",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "010",
+      "name": "Michael",
+      "phrase": "午餐決策王",
+      "fortune": {
+        "number": "第陸柒首",
+        "type": "選選中吉",
+        "description": "五秒決定午餐，節省腦力留給工作",
+        "keyword": "決斷力UP",
+        "conclusion": "選擇障礙剋星",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "011",
+      "name": "Sarah",
+      "phrase": "茶水間情報員",
+      "fortune": {
+        "number": "第捌玖首",
+        "type": "聽聽上吉",
+        "description": "掌握第一手消息，人脈網絡四通八達",
+        "keyword": "資訊達人",
+        "conclusion": "消息靈通",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "012",
+      "name": "Chris",
+      "phrase": "PPT美學家",
+      "fortune": {
+        "number": "第玖壹首",
+        "type": "美美大吉",
+        "description": "簡報一出手，老闆點頭稱讚",
+        "keyword": "視覺魔法",
+        "conclusion": "簡報之神",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "013",
+      "name": "Jessica",
+      "phrase": "請假藝術家",
+      "fortune": {
+        "number": "第貳壹首",
+        "type": "休休中吉",
+        "description": "該休就休不內疚，充電回來戰力強",
+        "keyword": "休息是為了走更長的路",
+        "conclusion": "工作生活平衡",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "014",
+      "name": "Brian",
+      "phrase": "Bug製造機",
+      "fortune": {
+        "number": "第參貳首",
+        "type": "修修上吉",
+        "description": "製造Bug是為了解決Bug，能力值持續成長",
+        "keyword": "越挫越勇",
+        "conclusion": "Debug大師",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "015",
+      "name": "Angela",
+      "phrase": "準時下班俠",
+      "fortune": {
+        "number": "第肆參首",
+        "type": "準準大吉",
+        "description": "效率超高準時走，生活品質沒話說",
+        "keyword": "效率至上",
+        "conclusion": "時間管理大師",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "016",
+      "name": "Ryan",
+      "phrase": "零食囤積王",
+      "fortune": {
+        "number": "第伍肆首",
+        "type": "囤囤中吉",
+        "description": "抽屜零食無限續，能量隨時補充中",
+        "keyword": "能量滿格",
+        "conclusion": "零食不斷",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "017",
+      "name": "Michelle",
+      "phrase": "郵件秒回王",
+      "fortune": {
+        "number": "第陸伍首",
+        "type": "快快上吉",
+        "description": "秒回郵件零延遲，客戶老闆都滿意",
+        "keyword": "效率王者",
+        "conclusion": "溝通無礙",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "018",
+      "name": "Daniel",
+      "phrase": "會議室預言家",
+      "fortune": {
+        "number": "第柒陸首",
+        "type": "預預中吉",
+        "description": "總能搶到好位置，會議室從不缺席",
+        "keyword": "先知先覺",
+        "conclusion": "占位達人",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "019",
+      "name": "Stephanie",
+      "phrase": "便利貼達人",
+      "fortune": {
+        "number": "第捌柒首",
+        "type": "貼貼上吉",
+        "description": "滿桌便利貼井然有序，待辦事項不遺漏",
+        "keyword": "有條有理",
+        "conclusion": "組織達人",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "020",
+      "name": "William",
+      "phrase": "午睡修復師",
+      "fortune": {
+        "number": "第玖捌首",
+        "type": "睡睡大吉",
+        "description": "午睡十五分鐘，下午精神百倍",
+        "keyword": "快速充電",
+        "conclusion": "滿血復活",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "021",
+      "name": "Jennifer",
+      "phrase": "團購發起人",
+      "fortune": {
+        "number": "第壹零首",
+        "type": "買買中吉",
+        "description": "團購揪人一把罩，同事福利少不了",
+        "keyword": "人脈廣闊",
+        "conclusion": "團購之神",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "022",
+      "name": "Andrew",
+      "phrase": "冷氣調控師",
+      "fortune": {
+        "number": "第貳零首",
+        "type": "涼涼上吉",
+        "description": "辦公室溫度剛剛好，工作效率沒煩惱",
+        "keyword": "環境大師",
+        "conclusion": "溫度掌控者",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "023",
+      "name": "Nicole",
+      "phrase": "表情包專家",
+      "fortune": {
+        "number": "第參零首",
+        "type": "笑笑大吉",
+        "description": "一圖勝千言，溝通零障礙",
+        "keyword": "梗圖大師",
+        "conclusion": "歡樂製造機",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "024",
+      "name": "Justin",
+      "phrase": "Git大神",
+      "fortune": {
+        "number": "第肆零首",
+        "type": "推推上吉",
+        "description": "Merge conflict 輕鬆解，版本控制沒問題",
+        "keyword": "版控達人",
+        "conclusion": "Git Master",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "025",
+      "name": "Rachel",
+      "phrase": "行事曆忍者",
+      "fortune": {
+        "number": "第伍零首",
+        "type": "排排中吉",
+        "description": "行程安排不衝突，時間運用超高效",
+        "keyword": "時間忍術",
+        "conclusion": "排程大師",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "026",
+      "name": "Patrick",
+      "phrase": "飲水機守護者",
+      "fortune": {
+        "number": "第陸零首",
+        "type": "水水上吉",
+        "description": "多喝水保健康，頭腦清晰思路暢",
+        "keyword": "養生達人",
+        "conclusion": "水分補給站",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "027",
+      "name": "Victoria",
+      "phrase": "植物照顧師",
+      "fortune": {
+        "number": "第柒零首",
+        "type": "綠綠中吉",
+        "description": "桌上綠意盎然，心情跟著好起來",
+        "keyword": "綠手指",
+        "conclusion": "療癒系",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "028",
+      "name": "Steven",
+      "phrase": "程式碼詩人",
+      "fortune": {
+        "number": "第捌零首",
+        "type": "寫寫大吉",
+        "description": "代碼如詩優雅美，Review通過沒問題",
+        "keyword": "Clean Code",
+        "conclusion": "程式藝術家",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "029",
+      "name": "Catherine",
+      "phrase": "會議紀錄王",
+      "fortune": {
+        "number": "第玖零首",
+        "type": "記記上吉",
+        "description": "會議重點不遺漏，同事都說讚",
+        "keyword": "速記達人",
+        "conclusion": "記憶大師",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "030",
+      "name": "Eric",
+      "phrase": "網路急診室",
+      "fortune": {
+        "number": "第壹零零首",
+        "type": "通通大吉",
+        "description": "網路斷線不用怕，找我一下就搞定",
+        "keyword": "IT救星",
+        "conclusion": "網路守護神",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "031",
+      "name": "Samantha",
+      "phrase": "檔案整理王",
+      "fortune": {
+        "number": "第壹壹零首",
+        "type": "整整上吉",
+        "description": "檔案分類超清楚，找東西秒定位",
+        "keyword": "整理術",
+        "conclusion": "秩序女王",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "032",
+      "name": "Mark",
+      "phrase": "早鳥打卡王",
+      "fortune": {
+        "number": "第壹貳零首",
+        "type": "早早大吉",
+        "description": "早起鳥兒有蟲吃，好事總是先得知",
+        "keyword": "勤奮第一",
+        "conclusion": "早起達人",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "033",
+      "name": "Olivia",
+      "phrase": "摸魚界菁英",
+      "fortune": {
+        "number": "第壹參零首",
+        "type": "摸摸中吉",
+        "description": "適度放鬆不是懶，是為了更好的表現",
+        "keyword": "張弛有度",
+        "conclusion": "效率摸魚",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "034",
+      "name": "Thomas",
+      "phrase": "鍵盤音樂家",
+      "fortune": {
+        "number": "第壹肆零首",
+        "type": "敲敲上吉",
+        "description": "打字如彈琴悅耳，工作如演奏順暢",
+        "keyword": "指尖藝術",
+        "conclusion": "鍵盤俠",
+        "prize": 500,
+        "isSpecial": false
+      }
+    },
+    {
+      "id": "035",
+      "name": "Grace",
+      "phrase": "微笑服務員",
+      "fortune": {
+        "number": "第壹伍零首",
+        "type": "笑笑大吉",
+        "description": "微笑是最好的名片，好運自然來敲門",
+        "keyword": "親和力MAX",
+        "conclusion": "人見人愛",
+        "prize": 500,
+        "isSpecial": true,
+        "specialPrize": 8888
+      }
+    }
+  ]
+}
