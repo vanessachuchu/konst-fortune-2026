@@ -2,7 +2,7 @@
 // 使用 Google Apps Script Web App 作為中間層
 
 // Google Apps Script Web App URL
-const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbzYvxgvj4tuz2uIZ3m6D4uCH5oBzNZHESprOvcSRolLofCV3_bkhfCwyofNm9P8TK4/exec';
+const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbzLqqESZfKuToI8kqlgZ-fbDWimvbRS2D-n5YIfJTvuFcv7nDkqFm7utuLAZQeh1GTW/exec';
 
 // 本地儲存 key (當 Google Sheets 無法連接時的備用方案)
 const LOCAL_STORAGE_KEY = 'konst-employees-2026';
@@ -16,9 +16,7 @@ export async function fetchEmployees() {
     try {
       const response = await fetch(`${SCRIPT_URL}?action=getAll`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        redirect: 'follow',
       });
 
       if (response.ok) {
@@ -48,22 +46,25 @@ export async function addEmployee(employeeData) {
   // 先存到本地
   saveLocalEmployee(employee);
 
-  // 嘗試同步到 Google Sheets
+  // 嘗試同步到 Google Sheets（使用 GET 請求避免 CORS 問題）
   if (SCRIPT_URL) {
     try {
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'add',
-          data: employee,
-        }),
+      // 將資料編碼為 URL 參數
+      const params = new URLSearchParams({
+        action: 'add',
+        data: JSON.stringify(employee),
       });
 
-      if (!response.ok) {
-        console.warn('Google Sheets 同步失敗');
+      const response = await fetch(`${SCRIPT_URL}?${params.toString()}`, {
+        method: 'GET',
+        redirect: 'follow',
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Google Sheets 同步成功:', result);
+      } else {
+        console.warn('Google Sheets 同步失敗:', response.status);
       }
     } catch (error) {
       console.warn('Google Sheets 連線失敗:', error);
