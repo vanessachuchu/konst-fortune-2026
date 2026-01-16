@@ -14,13 +14,8 @@ export async function fetchEmployees() {
   // 先嘗試從 Google Sheets 獲取
   if (SCRIPT_URL) {
     try {
-      const response = await fetch(`${SCRIPT_URL}?action=getAll`, {
-        method: 'GET',
-        redirect: 'follow',
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+      const data = await fetchGoogleSheets(`${SCRIPT_URL}?action=getAll`);
+      if (data && data.employees) {
         // 同時更新本地快取
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
         return data.employees || [];
@@ -35,6 +30,56 @@ export async function fetchEmployees() {
 }
 
 /**
+ * 透過隱藏 iframe 發送請求到 Google Sheets（繞過 CORS）
+ */
+function fetchGoogleSheets(url) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('Request timeout'));
+    }, 8000);
+
+    // 創建隱藏的 iframe 來載入資料
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
+
+    // 使用 message 事件接收資料（需要 Apps Script 配合）
+    const messageHandler = (event) => {
+      if (event.origin.includes('googleusercontent.com') || event.origin.includes('google.com')) {
+        try {
+          const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+          clearTimeout(timeout);
+          window.removeEventListener('message', messageHandler);
+          document.body.removeChild(iframe);
+          resolve(data);
+        } catch (e) {
+          // 忽略無法解析的訊息
+        }
+      }
+    };
+
+    window.addEventListener('message', messageHandler);
+    document.body.appendChild(iframe);
+
+    // 備用方案：如果 iframe 方式失敗，嘗試直接 fetch
+    setTimeout(async () => {
+      try {
+        const response = await fetch(url, { mode: 'cors' });
+        if (response.ok) {
+          const data = await response.json();
+          clearTimeout(timeout);
+          window.removeEventListener('message', messageHandler);
+          if (iframe.parentNode) document.body.removeChild(iframe);
+          resolve(data);
+        }
+      } catch (e) {
+        // 靜默失敗，等待 timeout
+      }
+    }, 100);
+  });
+}
+
+/**
  * 新增員工
  */
 export async function addEmployee(employeeData) {
@@ -46,29 +91,23 @@ export async function addEmployee(employeeData) {
   // 先存到本地
   saveLocalEmployee(employee);
 
-  // 嘗試同步到 Google Sheets（使用 GET 請求避免 CORS 問題）
+  // 嘗試同步到 Google Sheets（使用 Image beacon 避免 CORS 問題）
   if (SCRIPT_URL) {
-    try {
-      // 將資料編碼為 URL 參數
-      const params = new URLSearchParams({
-        action: 'add',
-        data: JSON.stringify(employee),
-      });
+    // 將資料編碼為 URL 參數
+    const params = new URLSearchParams({
+      action: 'add',
+      data: JSON.stringify(employee),
+    });
 
-      const response = await fetch(`${SCRIPT_URL}?${params.toString()}`, {
-        method: 'GET',
-        redirect: 'follow',
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Google Sheets 同步成功:', result);
-      } else {
-        console.warn('Google Sheets 同步失敗:', response.status);
-      }
-    } catch (error) {
-      console.warn('Google Sheets 連線失敗:', error);
-    }
+    // 使用 Image beacon 發送請求（fire-and-forget，繞過 CORS）
+    const img = new Image();
+    img.onload = () => console.log('Google Sheets 同步成功');
+    img.onerror = () => {
+      // 即使 onerror 觸發，請求可能已經成功送出
+      // Google Apps Script 會返回 JSON 而非圖片，所以會觸發 onerror
+      console.log('Google Sheets 請求已送出');
+    };
+    img.src = `${SCRIPT_URL}?${params.toString()}`;
   }
 
   return employee;
