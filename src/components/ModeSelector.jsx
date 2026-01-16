@@ -1,5 +1,16 @@
+import { useState } from 'react';
+
 // 首頁模式選擇
-function ModeSelector({ onSelectMode }) {
+function ModeSelector({ onSelectMode, wish, onWishChange }) {
+  const [localWish, setLocalWish] = useState(wish || '');
+
+  const handleWishChange = (e) => {
+    setLocalWish(e.target.value);
+    if (onWishChange) {
+      onWishChange(e.target.value);
+    }
+  };
+
   return (
     <div className="mode-selector">
       <div className="welcome-text">
@@ -42,6 +53,18 @@ function ModeSelector({ onSelectMode }) {
       >
         直接開始（不使用預註冊資料）
       </button>
+
+      {/* 願望輸入區 - 移到首頁 */}
+      <div className="wish-input-section">
+        <label>✨ 2026 年你的願望是什麼？</label>
+        <textarea
+          placeholder="例如：升職加薪、身體健康、找到真愛..."
+          value={localWish}
+          onChange={handleWishChange}
+          maxLength={50}
+        />
+        <span className="char-count">{localWish.length}/50</span>
+      </div>
 
       <p className="mode-hint">
         建議先使用「活動前預註冊」讓員工填寫資料，<br />

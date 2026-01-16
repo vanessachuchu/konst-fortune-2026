@@ -1181,88 +1181,154 @@ input[type="text"]::placeholder {
   z-index: 1;
 }
 
-.mode-title {
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.mode-title h3 {
-  font-size: 1.3rem;
-  color: white;
-  margin-bottom: 8px;
-}
-
-.mode-title p {
-  color: var(--space-silver-dark);
-  font-size: 0.95rem;
+.mode-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .mode-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+  padding: 24px 20px;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--dark-border);
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
-  text-align: left;
   width: 100%;
 }
 
 .mode-card:hover {
   border-color: var(--konst-blue);
-  background: rgba(99, 102, 241, 0.1);
-  transform: translateX(4px);
+  background: rgba(99, 102, 241, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
 }
 
 .mode-card:active {
-  transform: translateX(2px);
+  transform: translateY(0);
 }
 
-.mode-icon {
-  font-size: 2.5rem;
-  flex-shrink: 0;
+.mode-card .mode-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
 }
 
-.mode-content {
-  flex: 1;
-}
-
-.mode-content h4 {
-  font-size: 1.1rem;
-  color: white;
-  margin-bottom: 4px;
-}
-
-.mode-content p {
-  font-size: 0.85rem;
-  color: var(--space-silver-dark);
-  line-height: 1.4;
-}
-
-.mode-arrow {
-  color: var(--konst-blue);
+.mode-card h4 {
   font-size: 1.2rem;
-  opacity: 0.5;
-  transition: all 0.3s ease;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
 }
 
-.mode-card:hover .mode-arrow {
-  opacity: 1;
-  transform: translateX(4px);
+.mode-card p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+  margin-bottom: 12px;
 }
 
-.mode-card.primary {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 100%);
+.mode-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 20px;
+  color: var(--cyber-glow);
+}
+
+.mode-card.mode-preregister {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
   border-color: var(--konst-blue);
 }
 
-.mode-card.primary:hover {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0.1) 100%);
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+.mode-card.mode-eventday {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
+  border-color: var(--success-color);
+}
+
+.mode-card.mode-eventday .mode-tag {
+  background: rgba(16, 185, 129, 0.3);
+  color: var(--success-color);
+}
+
+.mode-divider {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  color: var(--space-silver-dark);
+  font-size: 0.9rem;
+}
+
+.mode-divider::before,
+.mode-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--dark-border);
+}
+
+.mode-divider span {
+  padding: 0 16px;
+}
+
+.mode-quick {
+  padding: 14px 20px;
+  font-size: 0.95rem;
+}
+
+.mode-hint {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--space-silver-dark);
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
+/* 願望輸入區 */
+.wish-input-section {
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid var(--dark-border);
+  border-radius: 16px;
+}
+
+.wish-input-section label {
+  display: block;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+}
+
+.wish-input-section textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  border: 1px solid var(--dark-border);
+  border-radius: 12px;
+  font-family: inherit;
+  resize: none;
+  height: 80px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.wish-input-section textarea:focus {
+  outline: none;
+  border-color: var(--konst-blue);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.wish-input-section textarea::placeholder {
+  color: var(--space-silver-dark);
 }
 
 /* ===== PreRegister Section ===== */

@@ -5,12 +5,11 @@ import EventDayLogin from './components/EventDayLogin';
 import StylePreview from './components/StylePreview';
 import Login from './components/Login';
 import Camera from './components/Camera';
-import MoodSelector from './components/MoodSelector';
 import FortuneGenerator from './components/FortuneGenerator';
 import Preview from './components/Preview';
 import './index.css';
 
-// 流程步驟
+// 流程步驟 - 移除 MOOD 步驟
 const STEPS = {
   MODE_SELECT: 'mode_select',     // 首頁模式選擇
   PRE_REGISTER: 'pre_register',   // 活動前預註冊
@@ -18,7 +17,6 @@ const STEPS = {
   STYLE_PREVIEW: 'style_preview', // 風格預覽
   LOGIN: 'login',                 // 快速模式登入
   CAMERA: 'camera',
-  MOOD: 'mood',
   GENERATING: 'generating',
   PREVIEW: 'preview',
 };
@@ -38,7 +36,6 @@ function App() {
   const [appMode, setAppMode] = useState(null); // 'preregister', 'eventday', 'quick'
   const [employee, setEmployee] = useState(null);
   const [photo, setPhoto] = useState(null);
-  const [mood, setMood] = useState(null);
   const [wish, setWish] = useState('');
   const [fortuneImage, setFortuneImage] = useState(null);
 
@@ -60,6 +57,11 @@ function App() {
     }
   };
 
+  // 願望變更
+  const handleWishChange = (newWish) => {
+    setWish(newWish);
+  };
+
   // 活動當天選擇員工
   const handleEventDaySelect = (selectedEmployee) => {
     setEmployee(selectedEmployee);
@@ -77,14 +79,9 @@ function App() {
     setCurrentStep(STEPS.CAMERA);
   };
 
+  // 拍照完成 - 直接進入生成（跳過心情選擇）
   const handleCapture = (capturedPhoto) => {
     setPhoto(capturedPhoto);
-    setCurrentStep(STEPS.MOOD);
-  };
-
-  const handleMoodSelect = (selectedMood, userWish) => {
-    setMood(selectedMood);
-    setWish(userWish);
     setCurrentStep(STEPS.GENERATING);
   };
 
@@ -96,7 +93,6 @@ function App() {
   const handleRestart = () => {
     setEmployee(null);
     setPhoto(null);
-    setMood(null);
     setWish('');
     setFortuneImage(null);
     // 根據模式返回不同頁面
@@ -111,7 +107,6 @@ function App() {
   const handleBackToModeSelect = () => {
     setEmployee(null);
     setPhoto(null);
-    setMood(null);
     setWish('');
     setFortuneImage(null);
     setAppMode(null);
@@ -120,13 +115,7 @@ function App() {
 
   const handleBackToCamera = () => {
     setPhoto(null);
-    setMood(null);
     setCurrentStep(STEPS.CAMERA);
-  };
-
-  const handleBackToMood = () => {
-    setMood(null);
-    setCurrentStep(STEPS.MOOD);
   };
 
   const handleBackToLogin = () => {
@@ -155,12 +144,10 @@ function App() {
         return 1;
       case STEPS.CAMERA:
         return 2;
-      case STEPS.MOOD:
-        return 3;
       case STEPS.GENERATING:
-        return 4;
+        return 3;
       case STEPS.PREVIEW:
-        return 5;
+        return 4;
       default:
         return 0;
     }
@@ -169,13 +156,20 @@ function App() {
   const renderStep = () => {
     switch (currentStep) {
       case STEPS.MODE_SELECT:
-        return <ModeSelector onSelectMode={handleModeSelect} />;
+        return (
+          <ModeSelector
+            onSelectMode={handleModeSelect}
+            wish={wish}
+            onWishChange={handleWishChange}
+          />
+        );
 
       case STEPS.PRE_REGISTER:
         return (
           <PreRegister
             onComplete={() => setCurrentStep(STEPS.MODE_SELECT)}
             onBack={handleBackToModeSelect}
+            wish={wish}
           />
         );
 
@@ -208,25 +202,14 @@ function App() {
           />
         );
 
-      case STEPS.MOOD:
-        return (
-          <MoodSelector
-            employee={employee}
-            photo={photo}
-            onSelect={handleMoodSelect}
-            onBack={handleBackToCamera}
-          />
-        );
-
       case STEPS.GENERATING:
         return (
           <FortuneGenerator
             employee={employee}
             photo={photo}
-            mood={mood}
             wish={wish}
             onComplete={handleFortuneComplete}
-            onBack={handleBackToMood}
+            onBack={handleBackToCamera}
           />
         );
 
@@ -240,11 +223,17 @@ function App() {
         );
 
       default:
-        return <ModeSelector onSelectMode={handleModeSelect} />;
+        return (
+          <ModeSelector
+            onSelectMode={handleModeSelect}
+            wish={wish}
+            onWishChange={handleWishChange}
+          />
+        );
     }
   };
 
-  // 判斷是否顯示進度條
+  // 判斷是否顯示進度條 - 調整為 5 步驟
   const showProgress = ![STEPS.MODE_SELECT, STEPS.PRE_REGISTER].includes(currentStep);
 
   return (
@@ -258,7 +247,7 @@ function App() {
 
         {showProgress && (
           <div className="progress-steps">
-            {[0, 1, 2, 3, 4, 5].map((step) => (
+            {[0, 1, 2, 3, 4].map((step) => (
               <div
                 key={step}
                 className={`progress-step ${

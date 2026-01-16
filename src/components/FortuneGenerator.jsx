@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 import { generateFortuneImage } from '../utils/fortuneCanvas';
+import { generateFortuneWithGrok } from '../utils/grokAI';
 
 // AI 處理過程的有趣提示語
 const LOADING_MESSAGES = [
-  'AI 正在分析你的面部特徵...',
-  '神經網路運算中...',
+  'AI 正在解讀你的命運密碼...',
+  'Grok 神經網路運算中...',
   '從量子維度抓取運勢數據...',
   '機器學習模型推論中...',
   '正在生成你的命運算法...',
   '大數據分析你的2026運勢...',
-  'GPT-Fortune 4.0 啟動中...',
+  'AI Fortune Engine 啟動中...',
+  '分析「形容詞+名詞」組合...',
 ];
 
-function FortuneGenerator({ employee, photo, mood, wish, onComplete, onBack }) {
+function FortuneGenerator({ employee, photo, wish, onComplete, onBack }) {
   const [status, setStatus] = useState('generating');
   const [fortuneImage, setFortuneImage] = useState(null);
   const [error, setError] = useState('');
@@ -29,8 +31,8 @@ function FortuneGenerator({ employee, photo, mood, wish, onComplete, onBack }) {
 
     // 進度條動畫
     const progressInterval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + Math.random() * 15, 95));
-    }, 300);
+      setProgress((prev) => Math.min(prev + Math.random() * 12, 90));
+    }, 350);
 
     return () => {
       clearInterval(msgInterval);
@@ -42,12 +44,20 @@ function FortuneGenerator({ employee, photo, mood, wish, onComplete, onBack }) {
     try {
       setStatus('generating');
 
-      // 模擬 AI 處理時間
-      await new Promise((resolve) => setTimeout(resolve, 2500));
+      // 使用 Grok AI 生成籤詩內容
+      const fortuneContent = await generateFortuneWithGrok({
+        name: employee.name,
+        adjective: employee.adjective || '',
+        noun: employee.noun || '',
+        wish: wish || '',
+      });
 
-      const imageData = await generateFortuneImage(employee, photo, mood, wish);
+      setProgress(70);
+
+      // 生成籤詩圖片
+      const imageData = await generateFortuneImage(employee, photo, fortuneContent, wish);
+
       setProgress(100);
-
       await new Promise((resolve) => setTimeout(resolve, 300));
 
       setFortuneImage(imageData);
@@ -75,6 +85,11 @@ function FortuneGenerator({ employee, photo, mood, wish, onComplete, onBack }) {
         <p style={{ color: '#A0A0A0', marginTop: '12px', fontSize: '0.9rem' }}>
           {employee.name}，你的專屬籤詩即將揭曉
         </p>
+        {employee.adjective && employee.noun && (
+          <p style={{ color: '#6366F1', marginTop: '8px', fontSize: '0.85rem' }}>
+            「{employee.adjective}{employee.noun}」的命運正在解析...
+          </p>
+        )}
       </div>
     );
   }
