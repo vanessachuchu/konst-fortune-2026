@@ -40,15 +40,27 @@ export async function addEmployee(employeeData) {
     registeredAt: new Date().toISOString(),
   };
 
-  // 先存到本地
+  // 先存到本地（包含完整資料）
   saveLocalEmployee(employee);
 
   // 嘗試同步到 Google Sheets（使用 Image beacon 避免 CORS 問題）
   if (SCRIPT_URL) {
+    // 準備要送到 Google Sheets 的資料（排除 base64 圖片，太大會導致 URL 超長）
+    const sheetData = {
+      id: employee.id,
+      name: employee.name,
+      adjective: employee.adjective || '',
+      noun: employee.noun || '',
+      phrase: employee.phrase || '',
+      styleType: employee.styleType || '',
+      styleName: employee.styleName || '',
+      registeredAt: employee.registeredAt,
+    };
+
     // 將資料編碼為 URL 參數
     const params = new URLSearchParams({
       action: 'add',
-      data: JSON.stringify(employee),
+      data: JSON.stringify(sheetData),
     });
 
     // 使用 Image beacon 發送請求（fire-and-forget，繞過 CORS）
