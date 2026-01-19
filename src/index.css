@@ -2118,3 +2118,50 @@ input[type="text"]::placeholder {
 .btn-text:hover {
   color: var(--konst-blue-light);
 }
+
+/* 快速入口卡片 */
+.quick-enter-card {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border: 2px solid var(--konst-blue);
+  border-radius: 16px;
+  padding: 32px 24px;
+  margin: 24px 0;
+  text-align: center;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+}
+
+.quick-enter-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.quick-enter-number {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold-color);
+  background: rgba(218, 165, 32, 0.2);
+  padding: 12px 20px;
+  border-radius: 12px;
+  text-shadow: 0 0 10px rgba(218, 165, 32, 0.5);
+}
+
+.quick-enter-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+}
+
+.quick-enter-phrase {
+  color: var(--cyber-glow);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.btn-large {
+  padding: 18px 40px;
+  font-size: 1.2rem;
+}

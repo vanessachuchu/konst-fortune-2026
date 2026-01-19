@@ -15,7 +15,7 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAqXTQmUtPX7
  */
 export async function generateStyleImageWithGemini({ name, adjective, noun }) {
   if (!GEMINI_API_KEY) {
-    console.log('Gemini API Key 未設定，使用備用圖片');
+    console.log('Gemini API Key 未設定，使用備用方案');
     return { imageUrl: null, suggestion: getDefaultSuggestion(adjective, noun) };
   }
 
@@ -35,52 +35,76 @@ Requirements:
 
 Style: Modern fashion illustration, clean lines, elegant`;
 
-  try {
-    const response = await fetch(`${GEMINI_IMAGE_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        }
-      }),
-    });
+  // 重試機制：最多重試 2 次，每次間隔增加
+  const maxRetries = 2;
+  let lastError = null;
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Gemini Image API 錯誤:', errorData);
-      throw new Error(`Gemini Image API 錯誤: ${response.status}`);
-    }
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // 如果不是第一次嘗試，等待一段時間
+      if (attempt > 0) {
+        const waitTime = attempt * 2000; // 2秒、4秒
+        console.log(`Gemini API 重試中... (等待 ${waitTime/1000} 秒)`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
+      }
 
-    const data = await response.json();
+      const response = await fetch(`${GEMINI_IMAGE_API_URL}?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          }
+        }),
+      });
 
-    // 從回應中提取圖片和文字
-    let imageUrl = null;
-    let suggestion = getDefaultSuggestion(adjective, noun);
+      // 處理 429 錯誤（太多請求）
+      if (response.status === 429) {
+        console.warn(`Gemini API 429 錯誤 (嘗試 ${attempt + 1}/${maxRetries + 1})`);
+        lastError = new Error('API 請求過於頻繁');
+        continue; // 重試
+      }
 
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      const parts = data.candidates[0].content.parts;
-      for (const part of parts) {
-        if (part.inlineData) {
-          imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-        } else if (part.text) {
-          suggestion = part.text;
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Gemini Image API 錯誤:', errorData);
+        throw new Error(`Gemini Image API 錯誤: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // 從回應中提取圖片和文字
+      let imageUrl = null;
+      let suggestion = getDefaultSuggestion(adjective, noun);
+
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        const parts = data.candidates[0].content.parts;
+        for (const part of parts) {
+          if (part.inlineData) {
+            imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+          } else if (part.text) {
+            suggestion = part.text;
+          }
         }
       }
-    }
 
-    return { imageUrl, suggestion };
-  } catch (error) {
-    console.error('Gemini 圖片生成失敗:', error);
-    return { imageUrl: null, suggestion: getDefaultSuggestion(adjective, noun) };
+      return { imageUrl, suggestion };
+    } catch (error) {
+      console.error(`Gemini 圖片生成失敗 (嘗試 ${attempt + 1}):`, error);
+      lastError = error;
+    }
   }
+
+  // 所有重試都失敗，返回備用方案
+  console.warn('Gemini API 重試耗盡，使用備用方案');
+  return { imageUrl: null, suggestion: getDefaultSuggestion(adjective, noun) };
 }
 
 /**

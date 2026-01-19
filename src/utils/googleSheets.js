@@ -234,3 +234,40 @@ export function importEmployeesFromJSON(jsonData) {
 export function clearLocalData() {
   localStorage.removeItem(LOCAL_STORAGE_KEY);
 }
+
+// ===== 當前用戶管理 =====
+
+const CURRENT_USER_KEY = 'konst-current-user-2026';
+
+/**
+ * 儲存當前用戶（記住登入狀態）
+ */
+export function saveCurrentUser(employee) {
+  try {
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(employee));
+  } catch (error) {
+    console.error('儲存當前用戶失敗:', error);
+  }
+}
+
+/**
+ * 獲取當前用戶
+ */
+export function getCurrentUser() {
+  try {
+    const data = localStorage.getItem(CURRENT_USER_KEY);
+    if (data) {
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('讀取當前用戶失敗:', error);
+  }
+  return null;
+}
+
+/**
+ * 清除當前用戶
+ */
+export function clearCurrentUser() {
+  localStorage.removeItem(CURRENT_USER_KEY);
+}

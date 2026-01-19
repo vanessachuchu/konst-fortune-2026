@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
-import { fetchEmployees } from '../utils/googleSheets';
+import { fetchEmployees, getCurrentUser, saveCurrentUser } from '../utils/googleSheets';
 
 function EventDayLogin({ employees: initialEmployees, onSelect, onGoToRegister }) {
   const [employees, setEmployees] = useState(initialEmployees || []);
   const [selectedId, setSelectedId] = useState('');
   const [loading, setLoading] = useState(!initialEmployees || initialEmployees.length === 0);
   const [error, setError] = useState('');
+  const [rememberedUser, setRememberedUser] = useState(null);
 
   useEffect(() => {
+    // 檢查是否有記住的用戶
+    const saved = getCurrentUser();
+    if (saved) {
+      setRememberedUser(saved);
+    }
+
     if (!initialEmployees || initialEmployees.length === 0) {
       loadEmployees();
     }
@@ -34,8 +41,22 @@ function EventDayLogin({ employees: initialEmployees, onSelect, onGoToRegister }
 
     const employee = employees.find(emp => String(emp.id) === String(selectedId));
     if (employee) {
+      // 記住這個用戶
+      saveCurrentUser(employee);
       onSelect(employee);
     }
+  };
+
+  // 快速進入（已記住的用戶）
+  const handleQuickEnter = () => {
+    if (rememberedUser) {
+      onSelect(rememberedUser);
+    }
+  };
+
+  // 切換到其他用戶
+  const handleSwitchUser = () => {
+    setRememberedUser(null);
   };
 
   if (loading) {
@@ -43,6 +64,38 @@ function EventDayLogin({ employees: initialEmployees, onSelect, onGoToRegister }
       <div className="loading-section">
         <div className="loading-spinner"></div>
         <p className="loading-text">載入員工名單中...</p>
+      </div>
+    );
+  }
+
+  // 如果有記住的用戶，顯示快速入口
+  if (rememberedUser) {
+    return (
+      <div className="eventday-login">
+        <div className="welcome-text">
+          <h3>🎉 歡迎回來！</h3>
+          <p>準備好開始你的尾牙之旅了嗎？</p>
+        </div>
+
+        <div className="quick-enter-card">
+          <div className="quick-enter-badge">
+            <span className="quick-enter-number">{rememberedUser.id}</span>
+            <span className="quick-enter-name">{rememberedUser.name}</span>
+          </div>
+          <p className="quick-enter-phrase">
+            「{rememberedUser.phrase || `${rememberedUser.adjective}${rememberedUser.noun}`}」
+          </p>
+        </div>
+
+        <div className="btn-group">
+          <button className="btn btn-primary btn-large" onClick={handleQuickEnter}>
+            開始尾牙活動
+          </button>
+        </div>
+
+        <button className="btn btn-text" onClick={handleSwitchUser}>
+          切換為其他人
+        </button>
       </div>
     );
   }
