@@ -13,8 +13,14 @@ import './index.css';
 // 活動日期常數
 const EVENT_DATE = new Date('2026-02-09T00:00:00+08:00');
 
-// 檢查是否為活動當天或之後
-const isEventDay = () => new Date() >= EVENT_DATE;
+// 檢查是否為活動當天或之後（支援 ?test=eventday 測試參數）
+const isEventDay = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('test') === 'eventday') {
+    return true; // 測試模式：強制進入活動頁面
+  }
+  return new Date() >= EVENT_DATE;
+};
 
 // 流程步驟
 const STEPS = {
