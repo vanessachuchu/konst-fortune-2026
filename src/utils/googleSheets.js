@@ -63,15 +63,16 @@ export async function addEmployee(employeeData) {
       data: JSON.stringify(sheetData),
     });
 
-    // 使用 Image beacon 發送請求（fire-and-forget，繞過 CORS）
-    const img = new Image();
-    img.onload = () => console.log('Google Sheets 同步成功');
-    img.onerror = () => {
-      // 即使 onerror 觸發，請求可能已經成功送出
-      // Google Apps Script 會返回 JSON 而非圖片，所以會觸發 onerror
+    // 使用 fetch + no-cors 模式（fire-and-forget，繞過 CORS 限制）
+    // no-cors 模式下請求會被送出，但無法讀取回應（這對我們 OK）
+    fetch(`${SCRIPT_URL}?${params.toString()}`, {
+      method: 'GET',
+      mode: 'no-cors',
+    }).then(() => {
       console.log('Google Sheets 請求已送出');
-    };
-    img.src = `${SCRIPT_URL}?${params.toString()}`;
+    }).catch((err) => {
+      console.warn('Google Sheets 請求失敗:', err);
+    });
   }
 
   return employee;
