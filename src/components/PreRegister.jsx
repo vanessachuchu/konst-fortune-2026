@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { addEmployee, getNextLuckyNumber, isNameExists } from '../utils/googleSheets';
-import { calculateStyle, generateStyleCard } from '../utils/styleGenerator';
+import { generateStyleImageWithGemini } from '../utils/geminiAI';
+import { calculateStyle } from '../utils/styleGenerator';
 
-function PreRegister({ onComplete, onBack }) {
+function PreRegister({ onComplete, onBack, isEventDay = false }) {
   const [step, setStep] = useState('input'); // input, preview, success
   const [name, setName] = useState('');
   const [adjective, setAdjective] = useState('');
   const [noun, setNoun] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [styleInfo, setStyleInfo] = useState(null);
   const [styleImage, setStyleImage] = useState(null);
+  const [styleSuggestion, setStyleSuggestion] = useState('');
   const [savedEmployee, setSavedEmployee] = useState(null);
 
-  // 形容詞和名詞選項
-  const adjectiveHints = ['熱血', '佛系', '斜槓', '爆肝', '躺平', '內捲', '社恐', '社牛'];
-  const nounHints = ['工程師', '設計師', '小資族', '打工人', '吃貨', '貓奴', '夜貓子', '早鳥'];
+  // 形容詞和名詞選項（各 3 個）
+  const adjectiveHints = ['熱血', '佛系', '躺平'];
+  const nounHints = ['工程師', '設計師', '打工人'];
 
   const handleGenerateStyle = async () => {
     if (!name.trim()) {
@@ -39,14 +40,15 @@ function PreRegister({ onComplete, onBack }) {
         return;
       }
 
-      // 計算風格
-      const style = calculateStyle(adjective.trim(), noun.trim());
-      setStyleInfo(style);
+      // 使用 Gemini AI 生成穿搭圖片
+      const { imageUrl, suggestion } = await generateStyleImageWithGemini({
+        name: name.trim(),
+        adjective: adjective.trim(),
+        noun: noun.trim(),
+      });
 
-      // 生成風格卡片圖片
-      const image = await generateStyleCard(name.trim(), adjective.trim(), noun.trim(), style);
-      setStyleImage(image);
-
+      setStyleImage(imageUrl);
+      setStyleSuggestion(suggestion);
       setStep('preview');
     } catch (err) {
       console.error('生成風格失敗:', err);
@@ -63,6 +65,9 @@ function PreRegister({ onComplete, onBack }) {
       // 獲取下一個抽獎號碼
       const luckyNumber = await getNextLuckyNumber();
 
+      // 計算風格類型（用於備用）
+      const style = calculateStyle(adjective.trim(), noun.trim());
+
       // 儲存到 Google Sheets / localStorage
       const employee = await addEmployee({
         id: luckyNumber,
@@ -70,12 +75,11 @@ function PreRegister({ onComplete, onBack }) {
         adjective: adjective.trim(),
         noun: noun.trim(),
         phrase: `${adjective.trim()}${noun.trim()}`,
-        styleType: styleInfo.id,
-        styleName: styleInfo.name,
-        styleImage: styleImage,
+        styleType: style.id,
+        styleName: style.name,
       });
 
-      setSavedEmployee(employee);
+      setSavedEmployee({ ...employee, styleImage, styleSuggestion });
       setStep('success');
     } catch (err) {
       console.error('儲存失敗:', err);
@@ -99,7 +103,7 @@ function PreRegister({ onComplete, onBack }) {
     return (
       <div className="preregister-section">
         <div className="welcome-text">
-          <h3>活動前預註冊</h3>
+          <h3>KONST 尾牙 2026</h3>
           <p>填寫你的資料，AI 會為你生成專屬穿搭建議</p>
         </div>
 
@@ -176,22 +180,24 @@ function PreRegister({ onComplete, onBack }) {
         </div>
 
         <div className="btn-group">
-          <button className="btn btn-secondary" onClick={onBack}>
-            返回
-          </button>
+          {onBack && (
+            <button className="btn btn-secondary" onClick={onBack}>
+              返回
+            </button>
+          )}
           <button
             className="btn btn-primary"
             onClick={handleGenerateStyle}
             disabled={loading || !name.trim() || !adjective.trim() || !noun.trim()}
           >
-            {loading ? '生成中...' : '生成穿搭建議'}
+            {loading ? 'AI 生成中...' : '生成 AI 穿搭建議'}
           </button>
         </div>
       </div>
     );
   }
 
-  // 步驟二：預覽風格
+  // 步驟二：預覽 AI 生成的穿搭圖
   if (step === 'preview') {
     return (
       <div className="preregister-section">
@@ -202,34 +208,29 @@ function PreRegister({ onComplete, onBack }) {
 
         {error && <div className="error-message">{error}</div>}
 
-        {/* 風格預覽卡 */}
-        <div className="style-preview-card">
-          <div className="style-emoji">{styleInfo.emoji}</div>
-          <h4 className="style-name">{styleInfo.name}</h4>
-          <p className="style-desc">{styleInfo.description}</p>
-
-          <div className="style-colors">
-            {styleInfo.colors.map((color, i) => (
-              <div
-                key={i}
-                className="color-dot"
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
-
-          <div className="style-suggestion">
-            <strong>穿搭建議</strong>
-            <p>{styleInfo.suggestion}</p>
-          </div>
+        {/* AI 生成的穿搭圖片 */}
+        <div className="ai-style-preview">
+          {styleImage ? (
+            <img src={styleImage} alt="AI 穿搭建議" className="ai-style-image" />
+          ) : (
+            <div className="ai-style-placeholder">
+              <span>🎨</span>
+              <p>AI 穿搭示意圖</p>
+            </div>
+          )}
         </div>
 
-        {/* 生成的圖片預覽 */}
-        {styleImage && (
-          <div className="style-image-preview">
-            <img src={styleImage} alt="Style card" />
+        {/* 穿搭建議文字 */}
+        <div className="style-info-card">
+          <div className="style-info-header">
+            <span className="style-name-tag">{name}</span>
+            <span className="style-phrase">「{adjective}{noun}」</span>
           </div>
-        )}
+          <div className="style-suggestion-text">
+            <strong>穿搭建議</strong>
+            <p>{styleSuggestion}</p>
+          </div>
+        </div>
 
         <div className="btn-group">
           <button className="btn btn-secondary" onClick={() => setStep('input')}>
@@ -263,33 +264,50 @@ function PreRegister({ onComplete, onBack }) {
         </div>
 
         <div className="success-info">
-          <p>風格：<strong>{styleInfo.name}</strong></p>
           <p>形容：<strong>{savedEmployee.phrase}</strong></p>
         </div>
 
-        <div className="success-reminder">
-          <p>📌 請記住你的抽獎號碼！</p>
-          <p>尾牙當天選擇你的名字即可快速開始</p>
-        </div>
+        {/* 根據是否活動當天顯示不同訊息 */}
+        {isEventDay ? (
+          <div className="success-reminder">
+            <p>🎊 馬上開始你的尾牙之旅！</p>
+          </div>
+        ) : (
+          <div className="success-reminder">
+            <p>📌 請記住你的抽獎號碼！</p>
+            <p>尾牙當天回來這裡開始活動</p>
+          </div>
+        )}
 
         <div className="btn-group">
-          <button className="btn btn-secondary" onClick={onBack}>
-            返回首頁
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              setStep('input');
-              setName('');
-              setAdjective('');
-              setNoun('');
-              setStyleInfo(null);
-              setStyleImage(null);
-              setSavedEmployee(null);
-            }}
-          >
-            繼續註冊下一位
-          </button>
+          {isEventDay ? (
+            <button
+              className="btn btn-primary"
+              onClick={() => onComplete && onComplete(savedEmployee)}
+            >
+              開始尾牙活動
+            </button>
+          ) : (
+            <>
+              <button className="btn btn-secondary" onClick={onBack}>
+                返回首頁
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setStep('input');
+                  setName('');
+                  setAdjective('');
+                  setNoun('');
+                  setStyleImage(null);
+                  setStyleSuggestion('');
+                  setSavedEmployee(null);
+                }}
+              >
+                繼續註冊下一位
+              </button>
+            </>
+          )}
         </div>
       </div>
     );

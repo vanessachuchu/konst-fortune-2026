@@ -1,8 +1,103 @@
-// Gemini AI 整合 - 生成籤詩內容
+// Gemini AI 整合 - 生成籤詩內容和穿搭圖片
 // 使用 Google Gemini API
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_IMAGE_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent';
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyAqXTQmUtPX716L0LgsqvDSxr4cEjdVICQ';
+
+/**
+ * 使用 Gemini AI 生成穿搭建議圖片
+ * @param {Object} params - 參數
+ * @param {string} params.name - 員工姓名
+ * @param {string} params.adjective - 形容詞
+ * @param {string} params.noun - 名詞
+ * @returns {Promise<Object>} - { imageUrl: string, suggestion: string }
+ */
+export async function generateStyleImageWithGemini({ name, adjective, noun }) {
+  if (!GEMINI_API_KEY) {
+    console.log('Gemini API Key 未設定，使用備用圖片');
+    return { imageUrl: null, suggestion: getDefaultSuggestion(adjective, noun) };
+  }
+
+  const prompt = `Generate a fashion outfit illustration for a company year-end party.
+
+Character style: "${adjective}${noun}" personality
+Occasion: Corporate year-end party (semi-formal)
+
+Requirements:
+- Full body fashion illustration style
+- Clean, modern aesthetic
+- Outfit suitable for "${adjective}${noun}" personality
+- White or light gradient background
+- No detailed facial features (stylized/abstract face is fine)
+- Professional yet trendy outfit
+- High quality fashion illustration
+
+Style: Modern fashion illustration, clean lines, elegant`;
+
+  try {
+    const response = await fetch(`${GEMINI_IMAGE_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE'],
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Gemini Image API 錯誤:', errorData);
+      throw new Error(`Gemini Image API 錯誤: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // 從回應中提取圖片和文字
+    let imageUrl = null;
+    let suggestion = getDefaultSuggestion(adjective, noun);
+
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      const parts = data.candidates[0].content.parts;
+      for (const part of parts) {
+        if (part.inlineData) {
+          imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        } else if (part.text) {
+          suggestion = part.text;
+        }
+      }
+    }
+
+    return { imageUrl, suggestion };
+  } catch (error) {
+    console.error('Gemini 圖片生成失敗:', error);
+    return { imageUrl: null, suggestion: getDefaultSuggestion(adjective, noun) };
+  }
+}
+
+/**
+ * 獲取預設穿搭建議文字
+ */
+function getDefaultSuggestion(adjective, noun) {
+  const suggestions = {
+    '熱血': '建議穿著亮色系襯衫搭配深色西裝外套，展現活力與專業並重的形象。',
+    '佛系': '建議穿著米白色或淺灰色系服裝，簡約大方，散發從容自在的氣質。',
+    '躺平': '建議穿著舒適的針織衫或休閒西裝，柔和色調讓人感到親切放鬆。',
+    '斜槓': '建議穿著有設計感的單品混搭，展現多元風格和獨特品味。',
+    '內捲': '建議穿著深色正裝搭配精緻配件，展現專業幹練的職場形象。',
+    '社恐': '建議穿著低調有質感的深色系服裝，搭配特色小配件展現個性。',
+    '社牛': '建議穿著亮眼的派對服裝，大膽配色讓你成為全場焦點。',
+  };
+  return suggestions[adjective] || '建議穿著舒適得體的服裝，展現最好的自己。';
+}
 
 /**
  * 使用 Gemini AI 生成籤詩內容

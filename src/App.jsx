@@ -1,22 +1,30 @@
-import { useState } from 'react';
-import ModeSelector from './components/ModeSelector';
+import { useState, useEffect } from 'react';
 import PreRegister from './components/PreRegister';
+import WaitingPage from './components/WaitingPage';
+import WishInput from './components/WishInput';
 import EventDayLogin from './components/EventDayLogin';
 import StylePreview from './components/StylePreview';
-import Login from './components/Login';
 import Camera from './components/Camera';
 import FortuneGenerator from './components/FortuneGenerator';
 import Preview from './components/Preview';
+import { fetchEmployees } from './utils/googleSheets';
 import './index.css';
 
-// 流程步驟 - 移除 MOOD 步驟
+// 活動日期常數
+const EVENT_DATE = new Date('2026-02-09T00:00:00+08:00');
+
+// 檢查是否為活動當天或之後
+const isEventDay = () => new Date() >= EVENT_DATE;
+
+// 流程步驟
 const STEPS = {
-  MODE_SELECT: 'mode_select',     // 首頁模式選擇
-  PRE_REGISTER: 'pre_register',   // 活動前預註冊
-  EVENT_LOGIN: 'event_login',     // 活動當天登入
-  STYLE_PREVIEW: 'style_preview', // 風格預覽
-  LOGIN: 'login',                 // 快速模式登入
+  LOADING: 'loading',           // 載入中（檢查註冊狀態）
+  PRE_REGISTER: 'pre_register', // 註冊頁面
+  WAITING: 'waiting',           // 敬請期待（活動前已註冊）
+  EVENT_LOGIN: 'event_login',   // 活動當天選擇員工
+  STYLE_PREVIEW: 'style_preview',
   CAMERA: 'camera',
+  WISH_INPUT: 'wish_input',     // 願望輸入
   GENERATING: 'generating',
   PREVIEW: 'preview',
 };
@@ -32,34 +40,52 @@ const KonstLogo = () => (
 );
 
 function App() {
-  const [currentStep, setCurrentStep] = useState(STEPS.MODE_SELECT);
-  const [appMode, setAppMode] = useState(null); // 'preregister', 'eventday', 'quick'
+  const [currentStep, setCurrentStep] = useState(STEPS.LOADING);
   const [employee, setEmployee] = useState(null);
+  const [employees, setEmployees] = useState([]);
   const [photo, setPhoto] = useState(null);
   const [wish, setWish] = useState('');
   const [fortuneImage, setFortuneImage] = useState(null);
+  const [eventDayMode, setEventDayMode] = useState(false);
 
-  // 模式選擇
-  const handleModeSelect = (mode) => {
-    setAppMode(mode);
-    switch (mode) {
-      case 'preregister':
-        setCurrentStep(STEPS.PRE_REGISTER);
-        break;
-      case 'eventday':
-        setCurrentStep(STEPS.EVENT_LOGIN);
-        break;
-      case 'quick':
-        setCurrentStep(STEPS.LOGIN);
-        break;
-      default:
-        setCurrentStep(STEPS.MODE_SELECT);
+  // 初始化：檢查日期和註冊狀態
+  useEffect(() => {
+    const init = async () => {
+      const isEvent = isEventDay();
+      setEventDayMode(isEvent);
+
+      try {
+        // 載入所有員工資料
+        const data = await fetchEmployees();
+        setEmployees(data);
+
+        if (isEvent) {
+          // 活動當天：顯示員工選擇頁面
+          setCurrentStep(STEPS.EVENT_LOGIN);
+        } else {
+          // 活動前：顯示註冊頁面
+          setCurrentStep(STEPS.PRE_REGISTER);
+        }
+      } catch (err) {
+        console.error('載入員工資料失敗:', err);
+        // 即使載入失敗也顯示註冊頁面
+        setCurrentStep(isEvent ? STEPS.EVENT_LOGIN : STEPS.PRE_REGISTER);
+      }
+    };
+
+    init();
+  }, []);
+
+  // 註冊完成處理
+  const handleRegisterComplete = (newEmployee) => {
+    setEmployee(newEmployee);
+    if (eventDayMode) {
+      // 活動當天：直接進入尾牙流程
+      setCurrentStep(STEPS.STYLE_PREVIEW);
+    } else {
+      // 活動前：顯示敬請期待
+      setCurrentStep(STEPS.WAITING);
     }
-  };
-
-  // 願望變更
-  const handleWishChange = (newWish) => {
-    setWish(newWish);
   };
 
   // 活動當天選擇員工
@@ -73,58 +99,37 @@ function App() {
     setCurrentStep(STEPS.CAMERA);
   };
 
-  // 快速模式登入（無預註冊資料）
-  const handleQuickLogin = (employeeData) => {
-    setEmployee(employeeData);
-    setCurrentStep(STEPS.CAMERA);
-  };
-
-  // 拍照完成 - 直接進入生成（跳過心情選擇）
+  // 拍照完成
   const handleCapture = (capturedPhoto) => {
     setPhoto(capturedPhoto);
+    setCurrentStep(STEPS.WISH_INPUT);
+  };
+
+  // 願望輸入完成
+  const handleWishSubmit = (submittedWish) => {
+    setWish(submittedWish);
     setCurrentStep(STEPS.GENERATING);
   };
 
+  // 籤詩生成完成
   const handleFortuneComplete = (generatedImage) => {
     setFortuneImage(generatedImage);
     setCurrentStep(STEPS.PREVIEW);
   };
 
+  // 重新開始
   const handleRestart = () => {
     setEmployee(null);
     setPhoto(null);
     setWish('');
     setFortuneImage(null);
-    // 根據模式返回不同頁面
-    if (appMode === 'eventday') {
-      setCurrentStep(STEPS.EVENT_LOGIN);
-    } else {
-      setCurrentStep(STEPS.MODE_SELECT);
-      setAppMode(null);
-    }
+    setCurrentStep(eventDayMode ? STEPS.EVENT_LOGIN : STEPS.PRE_REGISTER);
   };
 
-  const handleBackToModeSelect = () => {
-    setEmployee(null);
-    setPhoto(null);
-    setWish('');
-    setFortuneImage(null);
-    setAppMode(null);
-    setCurrentStep(STEPS.MODE_SELECT);
-  };
-
+  // 返回上一步
   const handleBackToCamera = () => {
     setPhoto(null);
     setCurrentStep(STEPS.CAMERA);
-  };
-
-  const handleBackToLogin = () => {
-    setEmployee(null);
-    if (appMode === 'eventday') {
-      setCurrentStep(STEPS.EVENT_LOGIN);
-    } else {
-      setCurrentStep(STEPS.LOGIN);
-    }
   };
 
   const handleBackToStylePreview = () => {
@@ -132,52 +137,78 @@ function App() {
     setCurrentStep(STEPS.STYLE_PREVIEW);
   };
 
+  const handleBackToWish = () => {
+    setCurrentStep(STEPS.WISH_INPUT);
+  };
+
+  // 幫其他同事註冊
+  const handleRegisterAnother = () => {
+    setEmployee(null);
+    setCurrentStep(STEPS.PRE_REGISTER);
+  };
+
+  // 活動當天的「尚未註冊」處理
+  const handleGoToRegister = () => {
+    setCurrentStep(STEPS.PRE_REGISTER);
+  };
+
+  // 計算進度
   const getStepIndex = () => {
     switch (currentStep) {
-      case STEPS.MODE_SELECT:
+      case STEPS.LOADING:
       case STEPS.PRE_REGISTER:
-        return 0;
+      case STEPS.WAITING:
       case STEPS.EVENT_LOGIN:
-      case STEPS.LOGIN:
-        return 1;
+        return 0;
       case STEPS.STYLE_PREVIEW:
         return 1;
       case STEPS.CAMERA:
         return 2;
-      case STEPS.GENERATING:
+      case STEPS.WISH_INPUT:
         return 3;
-      case STEPS.PREVIEW:
+      case STEPS.GENERATING:
         return 4;
+      case STEPS.PREVIEW:
+        return 5;
       default:
         return 0;
     }
   };
 
+  // 渲染步驟
   const renderStep = () => {
     switch (currentStep) {
-      case STEPS.MODE_SELECT:
+      case STEPS.LOADING:
         return (
-          <ModeSelector
-            onSelectMode={handleModeSelect}
-            wish={wish}
-            onWishChange={handleWishChange}
-          />
+          <div className="loading-section">
+            <div className="loading-spinner"></div>
+            <p>載入中...</p>
+          </div>
         );
 
       case STEPS.PRE_REGISTER:
         return (
           <PreRegister
-            onComplete={() => setCurrentStep(STEPS.MODE_SELECT)}
-            onBack={handleBackToModeSelect}
-            wish={wish}
+            onComplete={handleRegisterComplete}
+            onBack={eventDayMode ? () => setCurrentStep(STEPS.EVENT_LOGIN) : null}
+            isEventDay={eventDayMode}
+          />
+        );
+
+      case STEPS.WAITING:
+        return (
+          <WaitingPage
+            employee={employee}
+            onRegisterAnother={handleRegisterAnother}
           />
         );
 
       case STEPS.EVENT_LOGIN:
         return (
           <EventDayLogin
+            employees={employees}
             onSelect={handleEventDaySelect}
-            onBack={handleBackToModeSelect}
+            onGoToRegister={handleGoToRegister}
           />
         );
 
@@ -190,15 +221,21 @@ function App() {
           />
         );
 
-      case STEPS.LOGIN:
-        return <Login onLogin={handleQuickLogin} />;
-
       case STEPS.CAMERA:
         return (
           <Camera
             employee={employee}
             onCapture={handleCapture}
-            onBack={appMode === 'eventday' ? handleBackToStylePreview : handleBackToLogin}
+            onBack={handleBackToStylePreview}
+          />
+        );
+
+      case STEPS.WISH_INPUT:
+        return (
+          <WishInput
+            employee={employee}
+            onSubmit={handleWishSubmit}
+            onBack={handleBackToCamera}
           />
         );
 
@@ -209,7 +246,7 @@ function App() {
             photo={photo}
             wish={wish}
             onComplete={handleFortuneComplete}
-            onBack={handleBackToCamera}
+            onBack={handleBackToWish}
           />
         );
 
@@ -224,17 +261,21 @@ function App() {
 
       default:
         return (
-          <ModeSelector
-            onSelectMode={handleModeSelect}
-            wish={wish}
-            onWishChange={handleWishChange}
-          />
+          <div className="loading-section">
+            <p>載入中...</p>
+          </div>
         );
     }
   };
 
-  // 判斷是否顯示進度條 - 調整為 5 步驟
-  const showProgress = ![STEPS.MODE_SELECT, STEPS.PRE_REGISTER].includes(currentStep);
+  // 判斷是否顯示進度條
+  const showProgress = [
+    STEPS.STYLE_PREVIEW,
+    STEPS.CAMERA,
+    STEPS.WISH_INPUT,
+    STEPS.GENERATING,
+    STEPS.PREVIEW,
+  ].includes(currentStep);
 
   return (
     <div className="app-container">
@@ -247,7 +288,7 @@ function App() {
 
         {showProgress && (
           <div className="progress-steps">
-            {[0, 1, 2, 3, 4].map((step) => (
+            {[0, 1, 2, 3, 4, 5].map((step) => (
               <div
                 key={step}
                 className={`progress-step ${
