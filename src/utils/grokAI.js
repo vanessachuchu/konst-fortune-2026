@@ -1,20 +1,67 @@
-// Grok AI 整合 - 生成籤詩內容
-// 使用 xAI 的 Grok API
+// Grok AI 整合 - 使用 xAI Grok API
+// API 文檔: https://docs.x.ai/api
 
-const GROK_API_URL = import.meta.env.VITE_GROK_API_URL || 'https://api.x.ai/v1/chat/completions';
+const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
 const GROK_API_KEY = import.meta.env.VITE_GROK_API_KEY || '';
 
 /**
+ * 使用 Grok AI 生成穿搭建議（純文字）
+ */
+export async function generateStyleWithGrok({ name, adjective, noun }) {
+  if (!GROK_API_KEY) {
+    console.log('Grok API Key 未設定，使用備用方案');
+    return { suggestion: getDefaultSuggestion(adjective, noun) };
+  }
+
+  const prompt = `你是一位時尚顧問，請為這位「${adjective}${noun}」風格的員工提供尾牙派對穿搭建議。
+
+員工特徵：「${adjective}${noun}」
+場合：公司尾牙派對（半正式場合）
+
+請提供簡潔的穿搭建議（50-80字），包含：
+1. 服裝風格建議
+2. 顏色搭配
+3. 一個配件建議
+
+語氣要輕鬆友善，用繁體中文回答。直接給出建議，不要有開頭的客套話。`;
+
+  try {
+    const response = await fetch(GROK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROK_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'grok-2-latest',
+        messages: [
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 200,
+        temperature: 0.8,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Grok API 錯誤:', errorData);
+      throw new Error(`Grok API 錯誤: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const suggestion = data.choices[0].message.content.trim();
+
+    return { suggestion };
+  } catch (error) {
+    console.error('Grok 穿搭建議生成失敗:', error);
+    return { suggestion: getDefaultSuggestion(adjective, noun) };
+  }
+}
+
+/**
  * 使用 Grok AI 生成籤詩內容
- * @param {Object} params - 參數
- * @param {string} params.name - 員工姓名
- * @param {string} params.adjective - 形容詞
- * @param {string} params.noun - 名詞
- * @param {string} params.wish - 願望
- * @returns {Promise<Object>} - 籤詩內容
  */
 export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {
-  // 如果沒有 API Key，使用本地生成
   if (!GROK_API_KEY) {
     console.log('Grok API Key 未設定，使用本地生成');
     return generateLocalFortune({ name, adjective, noun, wish });
@@ -28,7 +75,7 @@ export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {
 - 自我形容：${adjective}${noun}
 - 2026年願望：${wish || '順利平安'}
 
-請生成以下格式的 JSON 回應：
+請生成以下格式的 JSON 回應（只回傳 JSON，不要其他文字）：
 {
   "level": "上上籤/上籤/中上籤/中籤/中下籤",
   "levelDesc": "對應等級的吉祥描述（如：大吉大利、萬事亨通等）",
@@ -53,104 +100,81 @@ export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {
         'Authorization': `Bearer ${GROK_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'grok-beta',
+        model: 'grok-2-latest',
         messages: [
-          {
-            role: 'system',
-            content: '你是一位專精於傳統籤詩的AI，回應必須是有效的JSON格式。'
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
+          { role: 'user', content: prompt }
         ],
-        temperature: 0.8,
         max_tokens: 800,
+        temperature: 0.8,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Grok API 錯誤: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(`Grok API 錯誤: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
     const content = data.choices[0].message.content;
 
     // 嘗試解析 JSON
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
 
     throw new Error('無法解析 Grok 回應');
   } catch (error) {
-    console.error('Grok AI 生成失敗:', error);
-    // 回退到本地生成
+    console.error('Grok AI 籤詩生成失敗:', error);
     return generateLocalFortune({ name, adjective, noun, wish });
   }
+}
+
+/**
+ * 獲取預設穿搭建議文字
+ */
+function getDefaultSuggestion(adjective, noun) {
+  const suggestions = {
+    '熱血': '建議穿著亮色系襯衫搭配深色西裝外套，展現活力與專業並重的形象。配件可選紅色領帶或胸針，讓整體造型更有精神。',
+    '佛系': '建議穿著米白色或淺灰色系服裝，簡約大方，散發從容自在的氣質。搭配簡約手錶或素色圍巾更顯質感。',
+    '躺平': '建議穿著舒適的針織衫或休閒西裝，柔和色調讓人感到親切放鬆。舒適的皮鞋或乾淨的帆布鞋都很適合！',
+    '斜槓': '建議穿著有設計感的單品混搭，展現多元風格和獨特品味。大膽的配飾如特色手錶或設計師眼鏡是加分項。',
+    '內捲': '建議穿著深色正裝搭配精緻配件，展現專業幹練的職場形象。袖扣或領帶夾很加分，展現對細節的講究。',
+    '社恐': '建議穿著低調有質感的深色系服裝，搭配特色小配件展現個性。無線耳機掛脖或簡約項鍊都很潮！',
+    '社牛': '建議穿著亮眼的派對服裝，大膽配色讓你成為全場焦點。閃亮配件或特色領結絕對不能少！',
+  };
+  return suggestions[adjective] || '建議穿著舒適得體的服裝，展現最好的自己。搭配一件有個人風格的配件，讓造型更有記憶點。';
 }
 
 /**
  * 本地生成籤詩（當 API 不可用時的備用方案）
  */
 function generateLocalFortune({ name, adjective, noun, wish }) {
-  // 根據形容詞+名詞組合決定籤詩風格
   const fortuneStyles = {
-    // 熱血系
     '熱血': { level: '上上籤', theme: 'passion', color: '紅色' },
     '斜槓': { level: '上籤', theme: 'versatile', color: '金色' },
     '內捲': { level: '中上籤', theme: 'hardwork', color: '藍色' },
-    // 佛系
     '佛系': { level: '上籤', theme: 'calm', color: '白色' },
     '躺平': { level: '中籤', theme: 'relax', color: '綠色' },
     '社恐': { level: '中上籤', theme: 'introvert', color: '紫色' },
-    // 活力系
     '社牛': { level: '上上籤', theme: 'social', color: '橙色' },
     '早鳥': { level: '上籤', theme: 'diligent', color: '黃色' },
-    // 默認
     'default': { level: '中上籤', theme: 'neutral', color: '銀色' },
   };
 
   const style = fortuneStyles[adjective] || fortuneStyles['default'];
 
-  // 預設籤詩庫 - 根據主題選擇
   const poems = {
-    passion: [
-      '熱血滿腔志氣高，乘風破浪展英豪。',
-      '蛇年運轉添新氣，事業騰飛步步高。'
-    ],
-    versatile: [
-      '斜槓人生路寬廣，多元發展創輝煌。',
-      '蛇行曲徑通幽處，條條大路任君闖。'
-    ],
-    hardwork: [
-      '辛勤耕耘終有報，默默付出見成效。',
-      '蛇年轉運迎新機，苦盡甘來春意鬧。'
-    ],
-    calm: [
-      '心如止水映明月，萬事隨緣自安然。',
-      '蛇年清靜福自來，無為而治得周全。'
-    ],
-    relax: [
-      '閒雲野鶴任逍遙，不爭不搶亦不躁。',
-      '蛇年悠然見南山，知足常樂最重要。'
-    ],
-    introvert: [
-      '獨處靜思有深意，內斂光華終綻放。',
-      '蛇年貴人來相助，默默發力最芬芳。'
-    ],
-    social: [
-      '廣結善緣路路通，八方來財樂融融。',
-      '蛇年人脈更精進，逢人便是好運逢。'
-    ],
-    diligent: [
-      '晨起早行多得利，勤勞致富不是虛。',
-      '蛇年先發占先機，早起的鳥有蟲吃。'
-    ],
-    neutral: [
-      '穩紮穩打基礎牢，循序漸進步步高。',
-      '蛇年平安是福氣，順心如意樂逍遙。'
-    ],
+    passion: '熱血滿腔志氣高，乘風破浪展英豪。\n蛇年運轉添新氣，事業騰飛步步高。',
+    versatile: '斜槓人生路寬廣，多元發展創輝煌。\n蛇行曲徑通幽處，條條大路任君闖。',
+    hardwork: '辛勤耕耘終有報，默默付出見成效。\n蛇年轉運迎新機，苦盡甘來春意鬧。',
+    calm: '心如止水映明月，萬事隨緣自安然。\n蛇年清靜福自來，無為而治得周全。',
+    relax: '閒雲野鶴任逍遙，不爭不搶亦不躁。\n蛇年悠然見南山，知足常樂最重要。',
+    introvert: '獨處靜思有深意，內斂光華終綻放。\n蛇年貴人來相助，默默發力最芬芳。',
+    social: '廣結善緣路路通，八方來財樂融融。\n蛇年人脈更精進，逢人便是好運逢。',
+    diligent: '晨起早行多得利，勤勞致富不是虛。\n蛇年先發占先機，早起的鳥有蟲吃。',
+    neutral: '穩紮穩打基礎牢，循序漸進步步高。\n蛇年平安是福氣，順心如意樂逍遙。',
   };
 
   const interpretations = {
@@ -189,28 +213,23 @@ function generateLocalFortune({ name, adjective, noun, wish }) {
     neutral: '穩健前行，偶爾也可以小冒險',
   };
 
-  const poemLines = poems[style.theme] || poems.neutral;
-
-  return {
-    level: style.level,
-    levelDesc: getLevelDesc(style.level),
-    mainPoem: poemLines.join('\n'),
-    interpretation: interpretations[style.theme] || interpretations.neutral,
-    luckyItem: luckyItems[style.theme] || luckyItems.neutral,
-    luckyColor: style.color,
-    advice: advice[style.theme] || advice.neutral,
-  };
-}
-
-function getLevelDesc(level) {
-  const descs = {
+  const levelDescs = {
     '上上籤': '大吉大利',
     '上籤': '萬事亨通',
     '中上籤': '漸入佳境',
     '中籤': '平安順遂',
     '中下籤': '先苦後甘',
   };
-  return descs[level] || '平安是福';
+
+  return {
+    level: style.level,
+    levelDesc: levelDescs[style.level] || '平安是福',
+    mainPoem: poems[style.theme] || poems.neutral,
+    interpretation: interpretations[style.theme] || interpretations.neutral,
+    luckyItem: luckyItems[style.theme] || luckyItems.neutral,
+    luckyColor: style.color,
+    advice: advice[style.theme] || advice.neutral,
+  };
 }
 
 export default generateFortuneWithGrok;

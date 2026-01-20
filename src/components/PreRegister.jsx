@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { addEmployee, getNextLuckyNumber, isNameExists } from '../utils/googleSheets';
-import { generateStyleImageWithGemini } from '../utils/geminiAI';
+import { generateStyleWithGrok } from '../utils/grokAI';
 import { calculateStyle } from '../utils/styleGenerator';
 
 function PreRegister({ onComplete, onBack, isEventDay = false }) {
@@ -10,7 +10,6 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
   const [noun, setNoun] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [styleImage, setStyleImage] = useState(null);
   const [styleSuggestion, setStyleSuggestion] = useState('');
   const [savedEmployee, setSavedEmployee] = useState(null);
 
@@ -40,14 +39,13 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
         return;
       }
 
-      // 使用 Gemini AI 生成穿搭圖片
-      const { imageUrl, suggestion } = await generateStyleImageWithGemini({
+      // 使用 Grok AI 生成穿搭建議（純文字）
+      const { suggestion } = await generateStyleWithGrok({
         name: name.trim(),
         adjective: adjective.trim(),
         noun: noun.trim(),
       });
 
-      setStyleImage(imageUrl);
       setStyleSuggestion(suggestion);
       setStep('preview');
     } catch (err) {
@@ -79,7 +77,7 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
         styleName: style.name,
       });
 
-      setSavedEmployee({ ...employee, styleImage, styleSuggestion });
+      setSavedEmployee({ ...employee, styleSuggestion });
       setStep('success');
     } catch (err) {
       console.error('儲存失敗:', err);
@@ -197,7 +195,7 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
     );
   }
 
-  // 步驟二：預覽 AI 生成的穿搭圖
+  // 步驟二：預覽 AI 生成的穿搭建議
   if (step === 'preview') {
     return (
       <div className="preregister-section">
@@ -208,26 +206,14 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
 
         {error && <div className="error-message">{error}</div>}
 
-        {/* AI 生成的穿搭圖片 */}
-        <div className="ai-style-preview">
-          {styleImage ? (
-            <img src={styleImage} alt="AI 穿搭建議" className="ai-style-image" />
-          ) : (
-            <div className="ai-style-placeholder">
-              <span>🎨</span>
-              <p>AI 穿搭示意圖</p>
-            </div>
-          )}
-        </div>
-
-        {/* 穿搭建議文字 */}
-        <div className="style-info-card">
+        {/* 穿搭建議卡片 */}
+        <div className="style-info-card style-info-card-large">
           <div className="style-info-header">
             <span className="style-name-tag">{name}</span>
             <span className="style-phrase">「{adjective}{noun}」</span>
           </div>
           <div className="style-suggestion-text">
-            <strong>穿搭建議</strong>
+            <strong>AI 穿搭建議</strong>
             <p>{styleSuggestion}</p>
           </div>
         </div>
@@ -299,7 +285,6 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
                   setName('');
                   setAdjective('');
                   setNoun('');
-                  setStyleImage(null);
                   setStyleSuggestion('');
                   setSavedEmployee(null);
                 }}
