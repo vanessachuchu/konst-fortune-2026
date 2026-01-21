@@ -69,6 +69,7 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
       // 儲存到 Google Sheets / localStorage
       const employee = await addEmployee({
         id: luckyNumber,
+        luckyNumber: luckyNumber, // 抽獎號碼
         name: name.trim(),
         adjective: adjective.trim(),
         noun: noun.trim(),
