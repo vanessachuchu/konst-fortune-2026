@@ -1,15 +1,15 @@
-// Grok AI 整合 - 使用 xAI Grok API
-// API 文檔: https://docs.x.ai/api
+// OpenAI API 整合
+// API 文檔: https://platform.openai.com/docs/api-reference
 
-const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
-const GROK_API_KEY = import.meta.env.VITE_GROK_API_KEY || '';
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || '';
 
 /**
  * 使用 Grok AI 生成穿搭建議（純文字）
  */
 export async function generateStyleWithGrok({ name, adjective, noun }) {
-  if (!GROK_API_KEY) {
-    console.log('Grok API Key 未設定，使用備用方案');
+  if (!OPENAI_API_KEY) {
+    console.log('OpenAI API Key 未設定，使用備用方案');
     return { suggestion: getDefaultSuggestion(adjective, noun) };
   }
 
@@ -26,14 +26,14 @@ export async function generateStyleWithGrok({ name, adjective, noun }) {
 語氣要輕鬆友善，用繁體中文回答。直接給出建議，不要有開頭的客套話。`;
 
   try {
-    const response = await fetch(GROK_API_URL, {
+    const response = await fetch(OPENAI_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROK_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'grok-2-latest',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'user', content: prompt }
         ],
@@ -44,8 +44,8 @@ export async function generateStyleWithGrok({ name, adjective, noun }) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Grok API 錯誤:', errorData);
-      throw new Error(`Grok API 錯誤: ${response.status}`);
+      console.error('OpenAI API 錯誤:', errorData);
+      throw new Error(`OpenAI API 錯誤: ${response.status}`);
     }
 
     const data = await response.json();
@@ -53,7 +53,7 @@ export async function generateStyleWithGrok({ name, adjective, noun }) {
 
     return { suggestion };
   } catch (error) {
-    console.error('Grok 穿搭建議生成失敗:', error);
+    console.error('OpenAI 穿搭建議生成失敗:', error);
     return { suggestion: getDefaultSuggestion(adjective, noun) };
   }
 }
@@ -62,8 +62,8 @@ export async function generateStyleWithGrok({ name, adjective, noun }) {
  * 使用 Grok AI 生成籤詩內容
  */
 export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {
-  if (!GROK_API_KEY) {
-    console.log('Grok API Key 未設定，使用本地生成');
+  if (!OPENAI_API_KEY) {
+    console.log('OpenAI API Key 未設定，使用本地生成');
     return generateLocalFortune({ name, adjective, noun, wish });
   }
 
@@ -93,14 +93,14 @@ export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {
 4. 必須是有效的 JSON 格式`;
 
   try {
-    const response = await fetch(GROK_API_URL, {
+    const response = await fetch(OPENAI_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROK_API_KEY}`,
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'grok-2-latest',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'user', content: prompt }
         ],
@@ -111,7 +111,7 @@ export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`Grok API 錯誤: ${response.status} - ${JSON.stringify(errorData)}`);
+      throw new Error(`OpenAI API 錯誤: ${response.status} - ${JSON.stringify(errorData)}`);
     }
 
     const data = await response.json();
@@ -124,9 +124,9 @@ export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {
       return JSON.parse(jsonMatch[0]);
     }
 
-    throw new Error('無法解析 Grok 回應');
+    throw new Error('無法解析 OpenAI 回應');
   } catch (error) {
-    console.error('Grok AI 籤詩生成失敗:', error);
+    console.error('OpenAI 籤詩生成失敗:', error);
     return generateLocalFortune({ name, adjective, noun, wish });
   }
 }
