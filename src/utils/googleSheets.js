@@ -64,16 +64,24 @@ export async function addEmployee(employeeData) {
       data: JSON.stringify(sheetData),
     });
 
-    // 使用 fetch + no-cors 模式（fire-and-forget，繞過 CORS 限制）
-    // no-cors 模式下請求會被送出，但無法讀取回應（這對我們 OK）
-    fetch(`${SCRIPT_URL}?${params.toString()}`, {
-      method: 'GET',
-      mode: 'no-cors',
-    }).then(() => {
-      console.log('Google Sheets 請求已送出');
-    }).catch((err) => {
-      console.warn('Google Sheets 請求失敗:', err);
-    });
+    // 先嘗試正常 GET 請求（需要 Google Apps Script 設定 CORS）
+    try {
+      const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
+      if (response.ok) {
+        console.log('Google Sheets 同步成功');
+      } else {
+        console.warn('Google Sheets 同步失敗，狀態碼:', response.status);
+      }
+    } catch (err) {
+      // 如果 CORS 失敗，嘗試 no-cors 模式（fire-and-forget）
+      console.warn('Google Sheets CORS 失敗，使用 no-cors 模式:', err);
+      fetch(`${SCRIPT_URL}?${params.toString()}`, {
+        method: 'GET',
+        mode: 'no-cors',
+      }).catch((e) => {
+        console.warn('Google Sheets no-cors 也失敗:', e);
+      });
+    }
   }
 
   return employee;
@@ -129,22 +137,35 @@ export async function searchEmployeeByName(name) {
 }
 
 /**
- * 獲取下一個可用的抽獎號碼
+ * 獲取下一個可用的抽獎號碼（隨機生成，確保不重複）
  */
 export async function getNextLuckyNumber() {
+  // 同時從 Google Sheets 和本地取得已使用的號碼
   const employees = await fetchEmployees();
-  const usedNumbers = new Set(employees.map(emp => emp.id));
+  const localEmployees = getLocalEmployees();
 
-  // 找到 01-99 之間第一個未使用的號碼
+  // 合併所有已使用的號碼
+  const allEmployees = [...employees, ...localEmployees];
+  const usedNumbers = new Set(allEmployees.map(emp => emp.id || emp.luckyNumber));
+
+  // 生成所有可用號碼 (01-99)
+  const availableNumbers = [];
   for (let i = 1; i <= 99; i++) {
     const num = String(i).padStart(2, '0');
     if (!usedNumbers.has(num)) {
-      return num;
+      availableNumbers.push(num);
     }
   }
 
-  // 如果都用完了，生成隨機號碼
-  return String(Math.floor(Math.random() * 99) + 1).padStart(2, '0');
+  // 如果還有可用號碼，隨機選一個
+  if (availableNumbers.length > 0) {
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    return availableNumbers[randomIndex];
+  }
+
+  // 如果都用完了，生成 100+ 的號碼
+  const maxNum = Math.max(...Array.from(usedNumbers).map(n => parseInt(n) || 0), 99);
+  return String(maxNum + 1).padStart(2, '0');
 }
 
 /**
