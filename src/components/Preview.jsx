@@ -1,6 +1,6 @@
 import { downloadImage, printImage, printToThermalPrinter } from '../utils/fortuneCanvas';
 
-function Preview({ employee, fortuneImage, onRestart }) {
+function Preview({ employee, fortuneImage, styleScore, onRestart }) {
   const handleDownload = () => {
     const filename = `konst-fortune-2026-${employee.name}.png`;
     downloadImage(fortuneImage, filename);
@@ -55,6 +55,25 @@ function Preview({ employee, fortuneImage, onRestart }) {
       <div className="fortune-preview">
         <img src={fortuneImage} alt="Fortune slip" />
       </div>
+
+      {/* 穿搭評分卡片 */}
+      {styleScore && (
+        <div className="style-score-card">
+          <div className="score-header">
+            {styleScore.score >= 85 && (
+              <div className="award-badge">🏆 AI 時尚大獎</div>
+            )}
+            <div className="score-display">
+              <span className="score-label">穿搭符合度</span>
+              <span className="score-value">{styleScore.score}</span>
+              <span className="score-max">/100</span>
+            </div>
+          </div>
+          <div className="score-feedback">
+            <p>{styleScore.feedback}</p>
+          </div>
+        </div>
+      )}
 
       <div className="action-buttons">
         <button className="btn btn-primary" onClick={handleDownload}>

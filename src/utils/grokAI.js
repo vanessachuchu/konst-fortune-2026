@@ -59,6 +59,128 @@ export async function generateStyleWithGrok({ name, adjective, noun }) {
 }
 
 /**
+ * 使用 OpenAI Vision API 評估穿搭符合度
+ * @param {string} photoDataUrl - 照片的 base64 data URL
+ * @param {string} styleSuggestion - AI 生成的穿搭建議
+ * @param {string} adjective - 形容詞
+ * @param {string} noun - 名詞
+ * @returns {Promise<{score: number, feedback: string}>} 評分結果（0-100分）和評語
+ */
+export async function evaluateStyleMatch({ photoDataUrl, styleSuggestion, adjective, noun }) {
+  if (!OPENAI_API_KEY) {
+    console.log('OpenAI API Key 未設定，使用本地評分');
+    return generateLocalScore(adjective, noun);
+  }
+
+  const prompt = `你是一位專業的時尚評審，請根據以下資訊評估這位員工的穿搭符合度：
+
+員工特質：「${adjective}${noun}」
+AI 建議的穿搭風格：${styleSuggestion}
+
+請仔細觀察照片中的穿搭，並給出 0-100 分的評分。
+
+評分標準：
+- 85分以上：完美符合建議，獲得「AI 時尚大獎」🏆
+- 70-84分：符合度高，穿搭得體
+- 50-69分：基本符合，有改進空間
+- 50分以下：與建議差距較大
+
+請以 JSON 格式回應（只回傳 JSON）：
+{
+  "score": 分數 (0-100),
+  "feedback": "30-50字的評語，說明符合或不符合的地方"
+}`;
+
+  try {
+    const response = await fetch(OPENAI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: photoDataUrl,
+                  detail: 'low' // 使用低解析度以節省成本
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 300,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('OpenAI Vision API 錯誤:', errorData);
+      throw new Error(`OpenAI API 錯誤: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0].message.content;
+
+    // 解析 JSON
+    const cleanContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+
+    if (jsonMatch) {
+      const result = JSON.parse(jsonMatch[0]);
+      return {
+        score: Math.max(0, Math.min(100, result.score)), // 確保分數在 0-100 之間
+        feedback: result.feedback || '穿搭符合度良好'
+      };
+    }
+
+    throw new Error('無法解析 OpenAI 回應');
+  } catch (error) {
+    console.error('OpenAI 穿搭評分失敗:', error);
+    return generateLocalScore(adjective, noun);
+  }
+}
+
+/**
+ * 本地評分（當 API 不可用時）
+ */
+function generateLocalScore(adjective, noun) {
+  // 根據形容詞給予不同分數範圍
+  const scoreRanges = {
+    '熱血': { min: 75, max: 95 },
+    '佛系': { min: 70, max: 85 },
+    '躺平': { min: 60, max: 75 },
+    '斜槓': { min: 75, max: 90 },
+    '內捲': { min: 70, max: 88 },
+    '社恐': { min: 65, max: 80 },
+    '社牛': { min: 80, max: 95 },
+    '早鳥': { min: 72, max: 87 },
+  };
+
+  const range = scoreRanges[adjective] || { min: 65, max: 85 };
+  const score = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+
+  const feedbacks = [
+    `你的${adjective}${noun}風格展現得很好，穿搭符合建議！`,
+    `整體搭配不錯，${adjective}的特質有表現出來。`,
+    `你的穿著與${adjective}${noun}的風格相當契合。`,
+    `很有個人特色，符合${adjective}${noun}的形象。`,
+  ];
+
+  return {
+    score,
+    feedback: feedbacks[Math.floor(Math.random() * feedbacks.length)]
+  };
+}
+
+/**
  * 使用 Grok AI 生成籤詩內容
  */
 export async function generateFortuneWithGrok({ name, adjective, noun, wish }) {

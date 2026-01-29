@@ -55,6 +55,10 @@ export async function addEmployee(employeeData) {
       styleType: employee.styleType || '',
       styleName: employee.styleName || '',
       luckyNumber: employee.id, // 抽獎號碼（與 id 相同）
+      score: employee.score || '',
+      styleFeedback: employee.styleFeedback || '',
+      isTopThree: employee.isTopThree || false,
+      evaluatedAt: employee.evaluatedAt || '',
       registeredAt: employee.registeredAt,
     };
 

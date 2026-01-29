@@ -116,7 +116,7 @@ function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
  * @param {Object} fortuneContent - Grok AI 生成的籤詩內容
  * @param {string} wish - 願望
  */
-export async function generateFortuneImage(employeeData, photoDataUrl, fortuneContent, wish = '') {
+export async function generateFortuneImage(employeeData, photoDataUrl, fortuneContent, wish = '', styleEvaluation = null) {
   const canvas = document.createElement('canvas');
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;

@@ -7,7 +7,7 @@ import StylePreview from './components/StylePreview';
 import Camera from './components/Camera';
 import FortuneGenerator from './components/FortuneGenerator';
 import Preview from './components/Preview';
-import { fetchEmployees } from './utils/googleSheets';
+import { fetchEmployees, updateEmployee } from './utils/googleSheets';
 import './index.css';
 
 // 活動日期常數
@@ -52,6 +52,7 @@ function App() {
   const [photo, setPhoto] = useState(null);
   const [wish, setWish] = useState('');
   const [fortuneImage, setFortuneImage] = useState(null);
+  const [styleScore, setStyleScore] = useState(null);
   const [eventDayMode, setEventDayMode] = useState(false);
 
   // 初始化：檢查日期和註冊狀態
@@ -118,8 +119,24 @@ function App() {
   };
 
   // 籤詩生成完成
-  const handleFortuneComplete = (generatedImage) => {
+  const handleFortuneComplete = async (generatedImage, scoreData) => {
     setFortuneImage(generatedImage);
+    setStyleScore(scoreData);
+
+    // 儲存評分到 Google Sheets
+    if (scoreData && employee) {
+      try {
+        await updateEmployee(employee.id, {
+          score: scoreData.score,
+          styleFeedback: scoreData.feedback,
+          isTopThree: scoreData.score >= 85,
+          evaluatedAt: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.error('儲存評分失敗:', err);
+      }
+    }
+
     setCurrentStep(STEPS.PREVIEW);
   };
 
@@ -129,6 +146,7 @@ function App() {
     setPhoto(null);
     setWish('');
     setFortuneImage(null);
+    setStyleScore(null);
     setCurrentStep(eventDayMode ? STEPS.EVENT_LOGIN : STEPS.PRE_REGISTER);
   };
 
@@ -261,6 +279,7 @@ function App() {
           <Preview
             employee={employee}
             fortuneImage={fortuneImage}
+            styleScore={styleScore}
             onRestart={handleRestart}
           />
         );
