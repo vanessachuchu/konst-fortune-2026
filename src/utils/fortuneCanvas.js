@@ -172,8 +172,24 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
   const fortuneNumber = getFortuneNumber();
   const yearGanzhi = getYearGanzhi(2026);
 
-  let yPos = 100;
+  let yPos = 80;
   const leftMargin = 100;
+
+  // ===== KONST Logo =====
+  try {
+    const logo = await loadImage('/konst-logo.png');
+    const logoHeight = 60;
+    const logoWidth = (logo.width / logo.height) * logoHeight;
+    ctx.drawImage(logo, (CANVAS_WIDTH - logoWidth) / 2, yPos, logoWidth, logoHeight);
+    yPos += logoHeight + 30;
+  } catch (e) {
+    // Logo 載入失敗，使用文字替代
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 36px "Orbitron", sans-serif';
+    ctx.fillStyle = COLORS.konstBlue;
+    ctx.fillText('KONST', CANVAS_WIDTH / 2, yPos + 40);
+    yPos += 70;
+  }
 
   // ===== 頂部區域 =====
   ctx.textAlign = 'center';
@@ -215,8 +231,8 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
   yPos += 40;
 
   // ===== 照片區域 =====
-  const photoWidth = 280;
-  const photoHeight = 280;
+  const photoWidth = 360;
+  const photoHeight = 360;
   const photoX = (CANVAS_WIDTH - photoWidth) / 2;
 
   ctx.strokeStyle = COLORS.konstBlue;
@@ -273,7 +289,7 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
     yPos += 50;
   }
 
-  // ===== 抽獎號碼 =====
+  // ===== 今年的幸運號碼 =====
   const luckyBoxWidth = 180;
   const luckyBoxHeight = 70;
   const luckyBoxX = (CANVAS_WIDTH - luckyBoxWidth) / 2;
@@ -288,7 +304,7 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
 
   ctx.font = '18px "Noto Sans TC", sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText('抽獎號碼', CANVAS_WIDTH / 2, yPos + 25);
+  ctx.fillText('今年的幸運號碼', CANVAS_WIDTH / 2, yPos + 25);
 
   ctx.font = 'bold 32px "Orbitron", "Noto Sans TC", sans-serif';
   ctx.fillStyle = '#FFFFFF';

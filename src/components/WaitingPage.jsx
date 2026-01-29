@@ -66,7 +66,7 @@ function WaitingPage({ employee, onRegisterAnother }) {
       <div className="registered-info">
         <div className="info-card">
           <div className="info-row">
-            <span className="info-label">抽獎號碼</span>
+            <span className="info-label">今年幸運號碼</span>
             <span className="info-value lucky-number">{employee.id}</span>
           </div>
           <div className="info-row">
@@ -81,7 +81,7 @@ function WaitingPage({ employee, onRegisterAnother }) {
       </div>
 
       <div className="waiting-reminder">
-        <p>📌 請記住你的抽獎號碼！</p>
+        <p>📌 請記住你的幸運號碼！</p>
         <p>尾牙當天回來這裡開始活動</p>
       </div>
 

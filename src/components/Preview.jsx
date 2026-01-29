@@ -47,7 +47,7 @@ function Preview({ employee, fortuneImage, styleScore, onRestart }) {
           {employee.name}，你是「{employee.phrase}」
         </p>
         <div className="lucky-number-display">
-          <span className="lucky-label">你的抽獎號碼</span>
+          <span className="lucky-label">今年的幸運號碼</span>
           <span className="lucky-number-big">{employee.luckyNumber}</span>
         </div>
       </div>
@@ -104,7 +104,7 @@ function Preview({ employee, fortuneImage, styleScore, onRestart }) {
       </div>
 
       <p className="footer-note">
-        {employee.name} | 抽獎號碼 {employee.luckyNumber} | KONST AI 2026 尾牙
+        {employee.name} | 幸運號碼 {employee.luckyNumber} | KONST AI 2026 尾牙
       </p>
     </div>
   );
