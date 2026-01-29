@@ -1,8 +1,8 @@
 // Fortune Canvas Generator - KONST AI 風格籤詩
 // Generates KONST branded fortune slip with Grok AI content
 
-const CANVAS_WIDTH = 1000;
-const CANVAS_HEIGHT = 1800;
+const CANVAS_WIDTH = 1200;  // 4 英吋 @ 300 DPI
+const CANVAS_HEIGHT = 1800; // 6 英吋 @ 300 DPI
 
 // KONST 品牌配色 + 傳統元素
 const COLORS = {
@@ -399,14 +399,15 @@ export function printImage(dataUrl, printerType = 'thermal') {
   if (printWindow) {
     const styles = printerType === 'thermal'
       ? `
-        @page { size: 80mm auto; margin: 0; }
-        body { margin: 0; padding: 0; width: 80mm; }
-        img { width: 80mm; height: auto; }
+        @page { size: 101.6mm auto; margin: 0; }
+        body { margin: 0; padding: 0; width: 101.6mm; }
+        img { width: 101.6mm; height: auto; }
       `
       : `
+        @page { size: 4in 6in; margin: 0; }
         body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         img { max-width: 100%; max-height: 100vh; }
-        @media print { body { margin: 0; } img { width: 100%; height: auto; } }
+        @media print { body { margin: 0; } img { width: 4in; height: 6in; } }
       `;
 
     printWindow.document.write(`
@@ -430,7 +431,7 @@ export async function printToThermalPrinter(dataUrl) {
   try {
     const img = await loadImage(dataUrl);
     const canvas = document.createElement('canvas');
-    const targetWidth = 576;
+    const targetWidth = 812; // 4 英吋 @ 203 DPI (熱感應印表機)
     const scale = targetWidth / img.width;
     canvas.width = targetWidth;
     canvas.height = img.height * scale;
