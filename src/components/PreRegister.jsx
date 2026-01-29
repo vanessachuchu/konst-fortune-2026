@@ -235,68 +235,13 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
     );
   }
 
-  // 步驟三：完成
-  if (step === 'success') {
-    return (
-      <div className="preregister-section">
-        <div className="welcome-text">
-          <div className="success-icon">🎉</div>
-          <h3 className="success-title">註冊成功！</h3>
-          <p>{savedEmployee.name}，你的資料已儲存</p>
-        </div>
-
-        <div className="lucky-number-display">
-          <span className="lucky-label">你的抽獎號碼</span>
-          <span className="lucky-number-big">{savedEmployee.id}</span>
-        </div>
-
-        <div className="success-info">
-          <p>形容：<strong>{savedEmployee.phrase}</strong></p>
-        </div>
-
-        {/* 根據是否活動當天顯示不同訊息 */}
-        {isEventDay ? (
-          <div className="success-reminder">
-            <p>🎊 馬上開始你的尾牙之旅！</p>
-          </div>
-        ) : (
-          <div className="success-reminder">
-            <p>📌 請記住你的抽獎號碼！</p>
-            <p>尾牙當天回來這裡開始活動</p>
-          </div>
-        )}
-
-        <div className="btn-group">
-          {isEventDay ? (
-            <button
-              className="btn btn-primary"
-              onClick={() => onComplete && onComplete(savedEmployee)}
-            >
-              開始尾牙活動
-            </button>
-          ) : (
-            <>
-              <button className="btn btn-secondary" onClick={onBack}>
-                返回首頁
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  setStep('input');
-                  setName('');
-                  setAdjective('');
-                  setNoun('');
-                  setStyleSuggestion('');
-                  setSavedEmployee(null);
-                }}
-              >
-                繼續註冊下一位
-              </button>
-            </>
-          )}
-        </div>
-      </div>
-    );
+  // 步驟三：完成 - 直接呼叫 onComplete 跳轉到 WaitingPage（含倒數）
+  if (step === 'success' && savedEmployee) {
+    // 自動呼叫 onComplete，讓 App.jsx 處理跳轉
+    if (onComplete) {
+      onComplete(savedEmployee);
+    }
+    return null;
   }
 
   return null;

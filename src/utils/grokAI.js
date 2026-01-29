@@ -13,17 +13,25 @@ export async function generateStyleWithGrok({ name, adjective, noun }) {
     return { suggestion: getDefaultSuggestion(adjective, noun) };
   }
 
-  const prompt = `你是一位時尚顧問，請為這位「${adjective}${noun}」風格的員工提供尾牙派對穿搭建議。
+  const prompt = `你是一位超懂 Z 世代的潮流時尚顧問，說話風格像小紅書或 IG 網紅。
 
-員工特徵：「${adjective}${noun}」
-場合：公司尾牙派對（半正式場合）
+這位員工的人設是：「${adjective}${noun}」
 
-請提供簡潔的穿搭建議（50-80字），包含：
-1. 服裝風格建議
-2. 顏色搭配
-3. 一個配件建議
+請根據這個人設，給出一套超搭的尾牙穿搭建議！
 
-語氣要輕鬆友善，用繁體中文回答。直接給出建議，不要有開頭的客套話。`;
+要求：
+1. 穿搭要能展現「${adjective}」的 vibe（例如：白目→敢穿敢撞色、佛系→鬆弛感穿搭、熱血→活力運動風混搭）
+2. 場合：公司尾牙（smart casual）
+3. 用年輕人的說話方式，可以用流行語（但不要太刻意）
+4. 50-80 字，包含：上衣/下著 + 顏色 + 一個配件
+5. 直接講重點，不要廢話
+
+風格參考：
+- 白目系：大膽撞色、有趣印花、敢穿就對了
+- 佛系：大地色、oversized、舒服最重要
+- 熱血系：亮色系、運動元素、活力滿滿
+- 可愛系：粉嫩色、有質感的小配件
+- 厭世系：黑灰色調、簡約俐落`;
 
   try {
     const response = await fetch(OPENAI_API_URL, {
