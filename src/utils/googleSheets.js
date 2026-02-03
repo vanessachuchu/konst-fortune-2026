@@ -68,23 +68,15 @@ export async function addEmployee(employeeData) {
       data: JSON.stringify(sheetData),
     });
 
-    // 先嘗試正常 GET 請求（需要 Google Apps Script 設定 CORS）
+    // 使用 no-cors 模式發送（避免 CORS 問題，fire-and-forget）
     try {
-      const response = await fetch(`${SCRIPT_URL}?${params.toString()}`);
-      if (response.ok) {
-        console.log('Google Sheets 同步成功');
-      } else {
-        console.warn('Google Sheets 同步失敗，狀態碼:', response.status);
-      }
-    } catch (err) {
-      // 如果 CORS 失敗，嘗試 no-cors 模式（fire-and-forget）
-      console.warn('Google Sheets CORS 失敗，使用 no-cors 模式:', err);
-      fetch(`${SCRIPT_URL}?${params.toString()}`, {
+      await fetch(`${SCRIPT_URL}?${params.toString()}`, {
         method: 'GET',
         mode: 'no-cors',
-      }).catch((e) => {
-        console.warn('Google Sheets no-cors 也失敗:', e);
       });
+      console.log('Google Sheets 同步請求已發送');
+    } catch (err) {
+      console.warn('Google Sheets 同步失敗:', err);
     }
   }
 
