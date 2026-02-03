@@ -175,11 +175,11 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
   let yPos = 80;
   const leftMargin = 100;
 
-  // ===== KONST Logo（使用圖片）=====
+  // ===== KONST Logo（使用圖片，原始尺寸 1548x720，比例約 2.15:1）=====
   try {
     const logoImg = await loadImage('/konst-fortune-2026/konst-colored_dark_mode.png');
-    const logoHeight = 50;
-    const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+    const logoHeight = 60;
+    const logoWidth = logoHeight * (1548 / 720); // 保持 2.15:1 比例
     const logoX = (CANVAS_WIDTH - logoWidth) / 2;
     ctx.drawImage(logoImg, logoX, yPos - 10, logoWidth, logoHeight);
     yPos += logoHeight + 20;

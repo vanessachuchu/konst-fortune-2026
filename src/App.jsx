@@ -308,7 +308,7 @@ function App() {
             src="/konst-fortune-2026/konst-colored_dark_mode.png"
             alt="KONST"
             className="header-logo-img"
-            style={{ width: '270px', height: '40px' }}
+            style={{ width: '300px', height: '140px', objectFit: 'contain' }}
           />
         </div>
         <h1>AI 靈籤</h1>
