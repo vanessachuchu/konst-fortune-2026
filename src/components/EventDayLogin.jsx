@@ -79,7 +79,6 @@ function EventDayLogin({ employees: initialEmployees, onSelect, onGoToRegister }
 
         <div className="quick-enter-card">
           <div className="quick-enter-badge">
-            <span className="quick-enter-number">{rememberedUser.id}</span>
             <span className="quick-enter-name">{rememberedUser.name}</span>
           </div>
           <p className="quick-enter-phrase">
@@ -121,7 +120,7 @@ function EventDayLogin({ employees: initialEmployees, onSelect, onGoToRegister }
                 <option value="">-- 請選擇 --</option>
                 {employees.map((emp) => (
                   <option key={emp.id} value={emp.id}>
-                    {emp.id} - {emp.name}（{emp.phrase || `${emp.adjective}${emp.noun}`}）
+                    {emp.name}（{emp.phrase || `${emp.adjective}${emp.noun}`}）
                   </option>
                 ))}
               </select>
@@ -134,7 +133,6 @@ function EventDayLogin({ employees: initialEmployees, onSelect, onGoToRegister }
             return emp ? (
               <div className="selected-preview">
                 <div className="preview-badge">
-                  <span className="preview-number">{emp.id}</span>
                   <span className="preview-name">{emp.name}</span>
                 </div>
                 <p className="preview-phrase">「{emp.phrase || `${emp.adjective}${emp.noun}`}」</p>
@@ -157,15 +155,11 @@ function EventDayLogin({ employees: initialEmployees, onSelect, onGoToRegister }
             </button>
           </div>
 
-          <p className="employee-count">
-            已註冊 {employees.length} 人
-          </p>
-
-          {/* 尚未註冊 */}
+          {/* 尚未生成穿搭建議 */}
           <div className="not-registered">
-            <p>還沒註冊？</p>
+            <p>還沒生成穿搭建議？</p>
             <button className="btn btn-outline" onClick={onGoToRegister}>
-              立即註冊
+              立即開始！
             </button>
           </div>
         </>

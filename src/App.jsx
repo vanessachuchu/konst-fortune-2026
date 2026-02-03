@@ -304,7 +304,12 @@ function App() {
     <div className="app-container">
       <header className="header">
         <div className="header-logo">
-          <img src="/konst-fortune-2026/konst-logo.png" alt="KONST" className="header-logo-img" />
+          <img
+            src="/konst-fortune-2026/konst-colored_dark_mode.png"
+            alt="KONST"
+            className="header-logo-img"
+            style={{ width: '270px', height: '40px' }}
+          />
         </div>
         <h1>AI 靈籤</h1>
         <h2>貳零貳陸 尾牙特別版</h2>

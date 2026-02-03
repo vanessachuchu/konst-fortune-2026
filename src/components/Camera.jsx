@@ -3,17 +3,14 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 function Camera({ employee, onCapture, onBack }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [facingMode, setFacingMode] = useState('user');
   const [error, setError] = useState('');
-  const [mode, setMode] = useState('camera'); // 'camera' or 'upload'
+
 
   const startCamera = useCallback(async () => {
-    if (mode !== 'camera') return;
-
     try {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
@@ -38,26 +35,24 @@ function Camera({ employee, onCapture, onBack }) {
     } catch (err) {
       console.error('Camera error:', err);
       if (err.name === 'NotAllowedError') {
-        setError('請允許使用相機權限，或選擇上傳照片');
+        setError('請允許使用相機權限');
       } else if (err.name === 'NotFoundError') {
-        setError('找不到相機裝置，請選擇上傳照片');
+        setError('找不到相機裝置');
       } else {
-        setError('無法開啟相機，請選擇上傳照片');
+        setError('無法開啟相機');
       }
     }
-  }, [facingMode, mode]);
+  }, [facingMode]);
 
   useEffect(() => {
-    if (mode === 'camera') {
-      startCamera();
-    }
+    startCamera();
 
     return () => {
       if (stream) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [facingMode, mode]);
+  }, [facingMode]);
 
   const switchCamera = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
@@ -104,100 +99,42 @@ function Camera({ employee, onCapture, onBack }) {
     }
   };
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setCapturedPhoto(event.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const retakePhoto = () => {
     setCapturedPhoto(null);
-    if (mode === 'camera') {
-      startCamera();
-    }
+    startCamera();
   };
 
   const confirmPhoto = () => {
     onCapture(capturedPhoto);
   };
 
-  const switchToUpload = () => {
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-    }
-    setMode('upload');
-    setError('');
-  };
-
-  const switchToCamera = () => {
-    setMode('camera');
-  };
-
   return (
     <div className="camera-section">
       <div className="welcome-text">
         <div className="employee-badge">
-          {employee.id} {employee.name}
+          {employee.name}
         </div>
         <h3>{capturedPhoto ? '照片預覽' : '拍攝你的靈籤照'}</h3>
-        <p>{capturedPhoto ? 'AI 將解讀你的表情生成籤詩' : '展現你今天的狀態！'}</p>
+        <p>{capturedPhoto ? 'AI 將解讀你的表情生成籤詩' : '展現你的水水穿搭'}</p>
       </div>
-
-      {/* 模式切換 */}
-      {!capturedPhoto && (
-        <div className="mode-toggle">
-          <button
-            className={`mode-btn ${mode === 'camera' ? 'active' : ''}`}
-            onClick={switchToCamera}
-          >
-            📷 拍照
-          </button>
-          <button
-            className={`mode-btn ${mode === 'upload' ? 'active' : ''}`}
-            onClick={switchToUpload}
-          >
-            📁 上傳照片
-          </button>
-        </div>
-      )}
 
       {error && <div className="error-message">{error}</div>}
 
       <div className="camera-preview">
         {!capturedPhoto ? (
-          mode === 'camera' ? (
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{ display: error ? 'none' : 'block' }}
-              />
-              <button className="switch-camera-btn" onClick={switchCamera} title="切換鏡頭">
-                🔄
-              </button>
-              {countdown && <div className="countdown-overlay">{countdown}</div>}
-            </>
-          ) : (
-            <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
-              <div className="upload-icon">📷</div>
-              <p>點擊選擇照片</p>
-              <p className="upload-hint">支援 JPG、PNG 格式</p>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-              />
-            </div>
-          )
+          <>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{ display: error ? 'none' : 'block' }}
+            />
+            <button className="switch-camera-btn" onClick={switchCamera} title="切換鏡頭">
+              🔄
+            </button>
+            {countdown && <div className="countdown-overlay">{countdown}</div>}
+          </>
         ) : (
           <img src={capturedPhoto} alt="Captured" />
         )}
@@ -207,18 +144,16 @@ function Camera({ employee, onCapture, onBack }) {
 
       <div className="camera-controls">
         {!capturedPhoto ? (
-          mode === 'camera' ? (
-            <>
-              <button
-                className="capture-btn"
-                onClick={startCountdown}
-                disabled={countdown !== null || error}
-              />
-              <p style={{ textAlign: 'center', marginTop: '12px', color: '#666', fontSize: '0.9rem' }}>
-                點擊拍照 (3秒倒數)
-              </p>
-            </>
-          ) : null
+          <>
+            <button
+              className="capture-btn"
+              onClick={startCountdown}
+              disabled={countdown !== null || error}
+            />
+            <p style={{ textAlign: 'center', marginTop: '12px', color: '#666', fontSize: '0.9rem' }}>
+              點擊拍照 (3秒倒數)
+            </p>
+          </>
         ) : (
           <div className="btn-group">
             <button className="btn btn-secondary" onClick={retakePhoto}>
