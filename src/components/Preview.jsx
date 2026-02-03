@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import { downloadImage, printImage, printToThermalPrinter } from '../utils/fortuneCanvas';
+import { uploadFortuneImage } from '../utils/googleDrive';
 
 function Preview({ employee, fortuneImage, styleScore, onRestart }) {
+  const [uploading, setUploading] = useState(false);
+  const [uploaded, setUploaded] = useState(false);
+
   const handleDownload = () => {
     const filename = `konst-fortune-2026-${employee.name}.png`;
     downloadImage(fortuneImage, filename);
@@ -12,6 +17,21 @@ function Preview({ employee, fortuneImage, styleScore, onRestart }) {
 
   const handleThermalPrint = () => {
     printToThermalPrinter(fortuneImage);
+  };
+
+  const handleUploadForPrint = async () => {
+    setUploading(true);
+    try {
+      await uploadFortuneImage(
+        fortuneImage,
+        employee.name,
+        employee.luckyNumber || employee.id
+      );
+      setUploaded(true);
+    } catch (err) {
+      console.error('上傳失敗', err);
+    }
+    setUploading(false);
   };
 
   const handleShare = async () => {
@@ -87,11 +107,15 @@ function Preview({ employee, fortuneImage, styleScore, onRestart }) {
         )}
 
         <div className="print-options">
+          <button
+            className="btn btn-thermal"
+            onClick={handleUploadForPrint}
+            disabled={uploading || uploaded}
+          >
+            {uploaded ? '✓ 已上傳' : uploading ? '上傳中...' : '上傳列印'}
+          </button>
           <button className="btn btn-secondary" onClick={handlePrint}>
             一般列印
-          </button>
-          <button className="btn btn-thermal" onClick={handleThermalPrint}>
-            快速列印（熱感應）
           </button>
         </div>
 
