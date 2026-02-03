@@ -1,7 +1,7 @@
 // Google Drive 上傳功能
 // 上傳籤詩圖片到共享資料夾供工作人員列印
 
-const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL;
+const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbxpVahz67vxkoSsCL7vDkBY3hwTj0G1T-rutGsWYKSCy03SQAtIbtzdsc0T6dA2HQn4/exec';
 
 /**
  * 上傳籤詩圖片到 Google Drive
