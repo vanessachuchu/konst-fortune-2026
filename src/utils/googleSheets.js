@@ -2,7 +2,7 @@
 // 使用 Google Apps Script Web App 作為中間層
 
 // Google Apps Script Web App URL
-const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbzUJIazhNVODYgVsUfk3eeSrM1wAE7d298EuQnZ20TijAJBONop3_0ul4E9OVEQl30F/exec';
+const SCRIPT_URL = import.meta.env.VITE_GOOGLE_SCRIPT_URL || 'https://script.google.com/macros/s/AKfycbwRF44BGIRbZZUwvxQcrNyZBEP-zaoVPpgmaM8CerEKCqgzn59lvqS_BP4Ca2Bzg9bP/exec';
 
 // 本地儲存 key (當 Google Sheets 無法連接時的備用方案)
 const LOCAL_STORAGE_KEY = 'konst-employees-2026';
