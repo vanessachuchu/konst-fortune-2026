@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { downloadImage, printImage, printToThermalPrinter } from '../utils/fortuneCanvas';
+import { downloadImage } from '../utils/fortuneCanvas';
 import { uploadFortuneImage } from '../utils/googleDrive';
 
 function Preview({ employee, fortuneImage, styleScore, onRestart }) {
@@ -9,14 +9,6 @@ function Preview({ employee, fortuneImage, styleScore, onRestart }) {
   const handleDownload = () => {
     const filename = `konst-fortune-2026-${employee.name}.png`;
     downloadImage(fortuneImage, filename);
-  };
-
-  const handlePrint = () => {
-    printImage(fortuneImage, 'normal');
-  };
-
-  const handleThermalPrint = () => {
-    printToThermalPrinter(fortuneImage);
   };
 
   const handleUploadForPrint = async () => {
@@ -32,30 +24,6 @@ function Preview({ employee, fortuneImage, styleScore, onRestart }) {
       console.error('上傳失敗', err);
     }
     setUploading(false);
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        const response = await fetch(fortuneImage);
-        const blob = await response.blob();
-        const file = new File([blob], `konst-fortune-${employee.name}.png`, {
-          type: 'image/png',
-        });
-
-        await navigator.share({
-          title: 'KONST AI 2026 尾牙籤詩',
-          text: `我是${employee.phrase}！來看看我的2026年籤詩`,
-          files: [file],
-        });
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          handleDownload();
-        }
-      }
-    } else {
-      handleDownload();
-    }
   };
 
   return (
@@ -100,24 +68,13 @@ function Preview({ employee, fortuneImage, styleScore, onRestart }) {
           下載籤詩
         </button>
 
-        {'share' in navigator && (
-          <button className="btn btn-success" onClick={handleShare}>
-            分享給朋友
-          </button>
-        )}
-
-        <div className="print-options">
-          <button
-            className="btn btn-thermal"
-            onClick={handleUploadForPrint}
-            disabled={uploading || uploaded}
-          >
-            {uploaded ? '✓ 已上傳' : uploading ? '上傳中...' : '上傳列印'}
-          </button>
-          <button className="btn btn-secondary" onClick={handlePrint}>
-            一般列印
-          </button>
-        </div>
+        <button
+          className="btn btn-thermal"
+          onClick={handleUploadForPrint}
+          disabled={uploading || uploaded}
+        >
+          {uploaded ? '✓ 已上傳' : uploading ? '上傳中...' : '上傳列印'}
+        </button>
 
         <button
           className="btn btn-outline"

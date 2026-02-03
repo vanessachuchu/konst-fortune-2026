@@ -7,7 +7,7 @@ import StylePreview from './components/StylePreview';
 import Camera from './components/Camera';
 import FortuneGenerator from './components/FortuneGenerator';
 import Preview from './components/Preview';
-import { fetchEmployees, updateEmployee } from './utils/googleSheets';
+import { fetchEmployees, updateEmployee, getNextLuckyNumber } from './utils/googleSheets';
 import './index.css';
 
 // 活動日期常數
@@ -34,16 +34,6 @@ const STEPS = {
   GENERATING: 'generating',
   PREVIEW: 'preview',
 };
-
-// KONST Logo SVG Component
-const KonstLogo = () => (
-  <svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 6L16 16L8 26" stroke="#6366F1" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M4 6L12 16L4 26" stroke="#818CF8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M20 6L28 16L20 26" stroke="#6366F1" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-    <text x="38" y="22" fill="white" fontFamily="Orbitron, sans-serif" fontSize="18" fontWeight="700">KONST</text>
-  </svg>
-);
 
 function App() {
   const [currentStep, setCurrentStep] = useState(STEPS.LOADING);
@@ -101,8 +91,16 @@ function App() {
     setCurrentStep(STEPS.STYLE_PREVIEW);
   };
 
-  // 從風格預覽進入拍照
-  const handleStylePreviewContinue = () => {
+  // 從風格預覽進入拍照（分配幸運號碼）
+  const handleStylePreviewContinue = async () => {
+    // 如果還沒有幸運號碼，現在分配一個
+    if (!employee.luckyNumber) {
+      const luckyNumber = await getNextLuckyNumber();
+      const updatedEmployee = { ...employee, luckyNumber };
+      setEmployee(updatedEmployee);
+      // 同步到 Google Sheets
+      await updateEmployee(employee.id, { luckyNumber });
+    }
     setCurrentStep(STEPS.CAMERA);
   };
 
@@ -306,7 +304,7 @@ function App() {
     <div className="app-container">
       <header className="header">
         <div className="header-logo">
-          <KonstLogo />
+          <img src="/konst-fortune-2026/konst-logo.png" alt="KONST" className="header-logo-img" />
         </div>
         <h1>AI 靈籤</h1>
         <h2>貳零貳陸 尾牙特別版</h2>

@@ -81,6 +81,12 @@ body {
   filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
 }
 
+.header-logo-img {
+  height: 40px;
+  width: auto;
+  filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+}
+
 .header-icon {
   font-size: 2.5rem;
   animation: float 3s ease-in-out infinite;

@@ -388,14 +388,16 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
   }
 
   // ===== 底部 KONST Logo =====
+  // 確保與上方內容有足夠間距，避免重疊
+  yPos = Math.max(yPos + 40, CANVAS_HEIGHT - 120);
   ctx.textAlign = 'center';
   ctx.font = 'bold 26px "Orbitron", sans-serif';
   ctx.fillStyle = COLORS.konstBlue;
-  ctx.fillText('KONST AI', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 90);
+  ctx.fillText('KONST AI', CANVAS_WIDTH / 2, yPos);
 
   ctx.font = '18px "Noto Sans TC", sans-serif';
   ctx.fillStyle = COLORS.lightText;
-  ctx.fillText('2026 尾牙  •  AI 個性靈籤', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 60);
+  ctx.fillText('2026 尾牙  •  AI 個性靈籤', CANVAS_WIDTH / 2, yPos + 30);
 
   return canvas.toDataURL('image/png');
 }

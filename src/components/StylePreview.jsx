@@ -10,23 +10,19 @@ function StylePreview({ employee, onContinue, onBack }) {
       {/* 員工資訊卡 */}
       <div className="employee-info-card">
         <div className="info-header">
-          <span className="info-number">{employee.id}</span>
           <span className="info-name">{employee.name}</span>
         </div>
-        <p className="info-phrase">「{employee.phrase}」</p>
+        <p className="info-phrase">「{employee.phrase || `${employee.adjective}${employee.noun}`}」</p>
       </div>
 
       {/* 風格建議卡 */}
       <div className="style-advice-card">
         <h4>🎨 AI 穿搭建議</h4>
-        <div className="advice-style">
-          <span className="style-badge">{employee.styleName}</span>
-        </div>
 
-        {/* 如果有生成的風格圖片 */}
-        {employee.styleImage && (
-          <div className="style-card-image">
-            <img src={employee.styleImage} alt="Style suggestion" />
+        {/* 顯示之前生成的穿搭建議文字 */}
+        {employee.styleSuggestion && (
+          <div className="style-suggestion-content">
+            <p>{employee.styleSuggestion}</p>
           </div>
         )}
 
