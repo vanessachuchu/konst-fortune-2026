@@ -32,11 +32,6 @@ function WaitingPage({ employee }) {
 
   return (
     <div className="waiting-page">
-      {/* Logo */}
-      <div className="logo-header">
-        <img src="/konst-fortune-2026/konst-logo.png" alt="KONST" className="header-logo" />
-      </div>
-
       <div className="welcome-text">
         <h3>敬請期待尾牙的到來！</h3>
         <p>{employee.name}，祝你中大獎！</p>
