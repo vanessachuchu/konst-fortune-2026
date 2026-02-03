@@ -93,10 +93,16 @@ export async function updateEmployee(id, updateData) {
 
   // 嘗試同步到 Google Sheets（使用 GET + no-cors 避免 CORS 問題）
   if (SCRIPT_URL) {
+    // 注意：id 在此系統中就是 name，用 name 作為識別
+    // 將 updateData 展開為獨立參數，方便 Google Apps Script 處理
     const params = new URLSearchParams({
       action: 'update',
-      id: id,
-      data: JSON.stringify(updateData),
+      name: id, // 用 name 來識別要更新的資料列
+    });
+
+    // 將要更新的欄位直接加入參數
+    Object.entries(updateData).forEach(([key, value]) => {
+      params.append(key, String(value));
     });
 
     try {
@@ -104,7 +110,7 @@ export async function updateEmployee(id, updateData) {
         method: 'GET',
         mode: 'no-cors',
       });
-      console.log('Google Sheets 更新請求已發送');
+      console.log('Google Sheets 更新請求已發送, name:', id, 'data:', updateData);
     } catch (error) {
       console.warn('Google Sheets 連線失敗:', error);
     }
