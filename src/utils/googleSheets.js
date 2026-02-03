@@ -54,7 +54,8 @@ export async function addEmployee(employeeData) {
       phrase: employee.phrase || '',
       styleType: employee.styleType || '',
       styleName: employee.styleName || '',
-      luckyNumber: employee.id, // 抽獎號碼（與 id 相同）
+      styleSuggestion: employee.styleSuggestion || '', // AI 穿搭建議
+      luckyNumber: employee.luckyNumber || '', // 抽獎號碼（尾牙當天再抽）
       score: employee.score || '',
       styleFeedback: employee.styleFeedback || '',
       isTopThree: employee.isTopThree || false,
@@ -140,15 +141,19 @@ export async function getNextLuckyNumber() {
   const employees = await fetchEmployees();
   const localEmployees = getLocalEmployees();
 
-  // 合併所有已使用的號碼
+  // 合併所有已使用的號碼（只計算有效的 luckyNumber，不是空字串）
   const allEmployees = [...employees, ...localEmployees];
-  const usedNumbers = new Set(allEmployees.map(emp => emp.id || emp.luckyNumber));
+  const usedNumbers = new Set(
+    allEmployees
+      .map(emp => emp.luckyNumber)
+      .filter(num => num && num !== '') // 只計算有值的 luckyNumber
+  );
 
-  // 生成所有可用號碼 (01-99)
+  // 生成所有可用號碼 (1-99)
   const availableNumbers = [];
   for (let i = 1; i <= 99; i++) {
-    const num = String(i).padStart(2, '0');
-    if (!usedNumbers.has(num)) {
+    const num = String(i);
+    if (!usedNumbers.has(num) && !usedNumbers.has(num.padStart(2, '0'))) {
       availableNumbers.push(num);
     }
   }
@@ -161,7 +166,7 @@ export async function getNextLuckyNumber() {
 
   // 如果都用完了，生成 100+ 的號碼
   const maxNum = Math.max(...Array.from(usedNumbers).map(n => parseInt(n) || 0), 99);
-  return String(maxNum + 1).padStart(2, '0');
+  return String(maxNum + 1);
 }
 
 /**

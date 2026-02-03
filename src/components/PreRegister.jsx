@@ -72,10 +72,11 @@ function PreRegister({ onComplete, onBack }) {
         phrase: `${adjective.trim()}${noun.trim()}`,
         styleType: style.id,
         styleName: style.name,
+        styleSuggestion: styleSuggestion, // AI 穿搭建議
         luckyNumber: '', // 尾牙當天再抽
       });
 
-      setSavedEmployee({ ...employee, styleSuggestion });
+      setSavedEmployee(employee);
       setStep('success');
     } catch (err) {
       console.error('儲存失敗:', err);
