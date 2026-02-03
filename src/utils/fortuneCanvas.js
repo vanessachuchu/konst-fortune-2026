@@ -177,7 +177,7 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
 
   // ===== KONST Logo（使用圖片）=====
   try {
-    const logoImg = await loadImage('/konst-logo.png');
+    const logoImg = await loadImage('/konst-fortune-2026/konst-logo.png');
     const logoHeight = 60;
     const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
     const logoX = (CANVAS_WIDTH - logoWidth) / 2;
