@@ -91,24 +91,20 @@ export async function updateEmployee(id, updateData) {
   // 更新本地資料
   updateLocalEmployee(id, updateData);
 
-  // 嘗試同步到 Google Sheets
+  // 嘗試同步到 Google Sheets（使用 GET + no-cors 避免 CORS 問題）
   if (SCRIPT_URL) {
-    try {
-      const response = await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'update',
-          id,
-          data: updateData,
-        }),
-      });
+    const params = new URLSearchParams({
+      action: 'update',
+      id: id,
+      data: JSON.stringify(updateData),
+    });
 
-      if (!response.ok) {
-        console.warn('Google Sheets 更新失敗');
-      }
+    try {
+      await fetch(`${SCRIPT_URL}?${params.toString()}`, {
+        method: 'GET',
+        mode: 'no-cors',
+      });
+      console.log('Google Sheets 更新請求已發送');
     } catch (error) {
       console.warn('Google Sheets 連線失敗:', error);
     }
