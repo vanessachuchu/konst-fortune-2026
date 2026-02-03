@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { addEmployee, getNextLuckyNumber, isNameExists } from '../utils/googleSheets';
+import { addEmployee, isNameExists } from '../utils/googleSheets';
 import { generateStyleWithGrok } from '../utils/grokAI';
 import { calculateStyle } from '../utils/styleGenerator';
 
-function PreRegister({ onComplete, onBack, isEventDay = false }) {
+function PreRegister({ onComplete, onBack }) {
   const [step, setStep] = useState('input'); // input, preview, success
   const [name, setName] = useState('');
   const [adjective, setAdjective] = useState('');
@@ -60,22 +60,19 @@ function PreRegister({ onComplete, onBack, isEventDay = false }) {
     setLoading(true);
 
     try {
-      // 獲取下一個抽獎號碼
-      const luckyNumber = await getNextLuckyNumber();
-
       // 計算風格類型（用於備用）
       const style = calculateStyle(adjective.trim(), noun.trim());
 
-      // 儲存到 Google Sheets / localStorage
+      // 儲存到 Google Sheets / localStorage（不抽幸運號碼，尾牙當天再抽）
       const employee = await addEmployee({
-        id: luckyNumber,
-        luckyNumber: luckyNumber, // 抽獎號碼
+        id: name.trim(), // 用名字當作暫時 ID
         name: name.trim(),
         adjective: adjective.trim(),
         noun: noun.trim(),
         phrase: `${adjective.trim()}${noun.trim()}`,
         styleType: style.id,
         styleName: style.name,
+        luckyNumber: '', // 尾牙當天再抽
       });
 
       setSavedEmployee({ ...employee, styleSuggestion });

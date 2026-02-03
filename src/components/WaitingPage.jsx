@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 // 活動日期
 const EVENT_DATE = new Date('2026-02-09T00:00:00+08:00');
 
-function WaitingPage({ employee, onRegisterAnother }) {
+function WaitingPage({ employee }) {
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
@@ -32,10 +32,14 @@ function WaitingPage({ employee, onRegisterAnother }) {
 
   return (
     <div className="waiting-page">
+      {/* Logo */}
+      <div className="logo-header">
+        <img src="/konst-fortune-2026/konst-logo.png" alt="KONST" className="header-logo" />
+      </div>
+
       <div className="welcome-text">
-        <div className="waiting-icon">🎊</div>
         <h3>敬請期待尾牙的到來！</h3>
-        <p>{employee.name}，你已成功註冊</p>
+        <p>{employee.name}，祝你中大獎！</p>
       </div>
 
       {/* 倒數計時 */}
@@ -66,32 +70,27 @@ function WaitingPage({ employee, onRegisterAnother }) {
       <div className="registered-info">
         <div className="info-card">
           <div className="info-row">
-            <span className="info-label">今年幸運號碼</span>
-            <span className="info-value lucky-number">{employee.id}</span>
-          </div>
-          <div className="info-row">
             <span className="info-label">姓名</span>
             <span className="info-value">{employee.name}</span>
           </div>
           <div className="info-row">
-            <span className="info-label">形容</span>
-            <span className="info-value">{employee.phrase || `${employee.adjective}${employee.noun}`}</span>
+            <span className="info-label">我的代表</span>
+            <span className="info-value highlight">{employee.phrase || `${employee.adjective}${employee.noun}`}</span>
           </div>
         </div>
       </div>
 
-      <div className="waiting-reminder">
-        <p>📌 請記住你的幸運號碼！</p>
-        <p>尾牙當天回來這裡開始活動</p>
-      </div>
-
-      {onRegisterAnother && (
-        <div className="btn-group">
-          <button className="btn btn-outline" onClick={onRegisterAnother}>
-            幫其他同事註冊
-          </button>
+      {/* AI 穿搭建議 */}
+      {employee.styleSuggestion && (
+        <div className="style-suggestion-card">
+          <h4>AI 穿搭建議</h4>
+          <p>{employee.styleSuggestion}</p>
         </div>
       )}
+
+      <div className="waiting-reminder">
+        <p>📌 尾牙當天回來這裡抽取幸運號碼！</p>
+      </div>
     </div>
   );
 }
