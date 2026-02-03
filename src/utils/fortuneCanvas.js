@@ -175,34 +175,22 @@ export async function generateFortuneImage(employeeData, photoDataUrl, fortuneCo
   let yPos = 80;
   const leftMargin = 100;
 
-  // ===== KONST Logo（Canvas 繪製）=====
-  ctx.textAlign = 'center';
-
-  // 繪製 >> 符號（三條漸層線）
-  const logoX = CANVAS_WIDTH / 2 - 120;
-  const chevronWidth = 20;
-  const chevronHeight = 40;
-  const chevronGap = 8;
-
-  for (let i = 0; i < 3; i++) {
-    const x = logoX + i * (chevronWidth + chevronGap);
-    const alpha = 0.4 + i * 0.3; // 漸層透明度
-    ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x, yPos);
-    ctx.lineTo(x + chevronWidth, yPos + chevronHeight / 2);
-    ctx.lineTo(x, yPos + chevronHeight);
-    ctx.stroke();
+  // ===== KONST Logo（使用圖片）=====
+  try {
+    const logoImg = await loadImage('/konst-logo.png');
+    const logoHeight = 60;
+    const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+    const logoX = (CANVAS_WIDTH - logoWidth) / 2;
+    ctx.drawImage(logoImg, logoX, yPos - 10, logoWidth, logoHeight);
+    yPos += logoHeight + 20;
+  } catch (e) {
+    // 如果圖片載入失敗，使用文字備用
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 42px "Orbitron", sans-serif';
+    ctx.fillStyle = COLORS.konstBlue;
+    ctx.fillText('KONST', CANVAS_WIDTH / 2, yPos + 32);
+    yPos += 70;
   }
-
-  // 繪製 KONST 文字
-  ctx.font = 'bold 42px "Orbitron", sans-serif';
-  ctx.fillStyle = '#1F2937';
-  ctx.fillText('KONST', CANVAS_WIDTH / 2 + 40, yPos + 32);
-  yPos += 70;
 
   // ===== 頂部區域 =====
   ctx.textAlign = 'center';
