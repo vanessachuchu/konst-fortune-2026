@@ -22,46 +22,66 @@ export async function uploadFortuneImage(imageDataUrl, employeeName, luckyNumber
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const fileName = `${luckyNumber}-${employeeName}-${timestamp}.png`;
 
-    // 由於 Base64 圖片很大，使用 POST 請求
-    const formData = new FormData();
-    formData.append('action', 'uploadImage');
-    formData.append('fileName', fileName);
-    formData.append('employeeName', employeeName);
-    formData.append('luckyNumber', luckyNumber);
-    formData.append('imageData', base64Data);
-
-    // 嘗試 fetch POST（可能會有 CORS 問題）
+    // 使用 no-cors 模式的 POST（不會觸發預檢請求）
+    // 注意：no-cors 模式無法讀取回應內容，但請求會被發送
     try {
-      const response = await fetch(SCRIPT_URL, {
+      const formData = new FormData();
+      formData.append('action', 'uploadImage');
+      formData.append('fileName', fileName);
+      formData.append('employeeName', employeeName);
+      formData.append('luckyNumber', luckyNumber);
+      formData.append('imageData', base64Data);
+
+      await fetch(SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors', // 避免 CORS 預檢
         body: formData,
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        return result;
-      }
+      // no-cors 模式下無法確認結果，假設成功
+      console.log('上傳請求已發送（no-cors 模式）');
+      return { success: true };
     } catch (fetchError) {
-      console.warn('POST 請求失敗，嘗試 Image beacon 方式', fetchError);
+      console.warn('POST 請求失敗，嘗試備用方案', fetchError);
     }
 
-    // 備用方案：使用 Image beacon（限制較大的圖片可能會失敗）
-    const params = new URLSearchParams({
-      action: 'uploadImage',
-      fileName,
-      employeeName,
-      luckyNumber,
-      imageData: base64Data,
-    });
-
+    // 備用方案：使用 iframe 表單提交（適合大型資料）
     return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve({ success: true });
-      img.onerror = () => resolve({ success: true }); // 即使 onerror 也視為成功（no-cors 限制）
-      img.src = `${SCRIPT_URL}?${params.toString()}`;
+      const iframe = document.createElement('iframe');
+      iframe.name = 'uploadFrame';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
 
-      // 5秒後視為成功（no-cors 無法取得回應）
-      setTimeout(() => resolve({ success: true }), 5000);
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = SCRIPT_URL;
+      form.target = 'uploadFrame';
+
+      const fields = {
+        action: 'uploadImage',
+        fileName,
+        employeeName,
+        luckyNumber,
+        imageData: base64Data,
+      };
+
+      Object.entries(fields).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+
+      // 清理並假設成功
+      setTimeout(() => {
+        document.body.removeChild(form);
+        document.body.removeChild(iframe);
+        resolve({ success: true });
+      }, 3000);
     });
 
   } catch (error) {
