@@ -281,19 +281,28 @@ function getDefaultSuggestion(adjective, noun) {
  * 本地生成籤詩（當 API 不可用時的備用方案）
  */
 function generateLocalFortune({ name, adjective, noun, wish }) {
+  // 籤詩等級列表（權重：上籤類較多，增加好運氣氛）
+  const levels = ['上上籤', '上上籤', '上籤', '上籤', '上籤', '中上籤', '中上籤', '中籤'];
+
+  // 根據名字+形容詞+名詞生成一個穩定的隨機種子
+  const seed = `${name}${adjective}${noun}`.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const randomLevel = levels[seed % levels.length];
+
   const fortuneStyles = {
-    '熱血': { level: '上上籤', theme: 'passion', color: '紅色' },
-    '斜槓': { level: '上籤', theme: 'versatile', color: '金色' },
-    '內捲': { level: '中上籤', theme: 'hardwork', color: '藍色' },
-    '佛系': { level: '上籤', theme: 'calm', color: '白色' },
-    '躺平': { level: '中籤', theme: 'relax', color: '綠色' },
-    '社恐': { level: '中上籤', theme: 'introvert', color: '紫色' },
-    '社牛': { level: '上上籤', theme: 'social', color: '橙色' },
-    '早鳥': { level: '上籤', theme: 'diligent', color: '黃色' },
-    'default': { level: '中上籤', theme: 'neutral', color: '銀色' },
+    '熱血': { theme: 'passion', color: '紅色' },
+    '斜槓': { theme: 'versatile', color: '金色' },
+    '內捲': { theme: 'hardwork', color: '藍色' },
+    '佛系': { theme: 'calm', color: '白色' },
+    '躺平': { theme: 'relax', color: '綠色' },
+    '社恐': { theme: 'introvert', color: '紫色' },
+    '社牛': { theme: 'social', color: '橙色' },
+    '早鳥': { theme: 'diligent', color: '黃色' },
+    'default': { theme: 'neutral', color: '銀色' },
   };
 
   const style = fortuneStyles[adjective] || fortuneStyles['default'];
+  // 使用隨機等級，而非固定等級
+  style.level = randomLevel;
 
   const poems = {
     passion: '熱血滿腔志氣高，乘風破浪展英豪。\n蛇年運轉添新氣，事業騰飛步步高。',
