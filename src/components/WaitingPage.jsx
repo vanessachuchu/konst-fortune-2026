@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-// 活動日期
-const EVENT_DATE = new Date('2026-02-09T00:00:00+08:00');
+// 活動日期（2026/2/9 17:30 開始）
+const EVENT_DATE = new Date('2026-02-09T17:30:00+08:00');
 
 function WaitingPage({ employee }) {
   const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
