@@ -10,8 +10,8 @@ import Preview from './components/Preview';
 import { fetchEmployees, updateEmployee, getNextLuckyNumber } from './utils/googleSheets';
 import './index.css';
 
-// 活動日期常數
-const EVENT_DATE = new Date('2026-02-09T00:00:00+08:00');
+// 活動日期常數（2026/2/9 17:30 開始）
+const EVENT_DATE = new Date('2026-02-09T17:30:00+08:00');
 
 // 檢查是否為活動當天或之後（支援 ?test=eventday 測試參數）
 const isEventDay = () => {

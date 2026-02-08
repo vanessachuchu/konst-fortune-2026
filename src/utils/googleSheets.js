@@ -151,9 +151,9 @@ export async function getNextLuckyNumber() {
       .filter(num => num && num !== '') // 只計算有值的 luckyNumber
   );
 
-  // 生成所有可用號碼 (1-99)
+  // 生成所有可用號碼 (1-50)
   const availableNumbers = [];
-  for (let i = 1; i <= 99; i++) {
+  for (let i = 1; i <= 50; i++) {
     const num = String(i);
     if (!usedNumbers.has(num) && !usedNumbers.has(num.padStart(2, '0'))) {
       availableNumbers.push(num);
@@ -166,8 +166,8 @@ export async function getNextLuckyNumber() {
     return availableNumbers[randomIndex];
   }
 
-  // 如果都用完了，生成 100+ 的號碼
-  const maxNum = Math.max(...Array.from(usedNumbers).map(n => parseInt(n) || 0), 99);
+  // 如果都用完了，生成 51+ 的號碼
+  const maxNum = Math.max(...Array.from(usedNumbers).map(n => parseInt(n) || 0), 50);
   return String(maxNum + 1);
 }
 
